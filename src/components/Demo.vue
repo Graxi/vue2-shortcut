@@ -1,6 +1,14 @@
 <template>
   <div class='container'>
-    <div class='component' v-shortcut-scope="'a'">Component A</div>
+    <div class='component' v-shortcut-scope="'a'">
+      <h4>Component A</h4>
+      <p>
+        Shortcut is disabled globally in input field
+      </p>
+      <p>
+        <input type='text' />
+      </p>
+    </div>
     <div class='component' v-shortcut-scope="'b'">Component B</div>
     <div class='component' v-shortcut-scope="'c'">Component C</div>
     <div class='component' v-shortcut-scope="'d'">Component D</div>

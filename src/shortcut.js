@@ -1,5 +1,4 @@
 const CTRL = 'ctrl'; // a virtual key to handle control
-const INPUT_TAG_NAME = 'INPUT';
 
 const SCOPE_DATA_ATTRIBUTE = 'vshortcutscope';
 const GLOBAL_SCOPE = 'GLOBAL_SCOPE';
@@ -49,7 +48,10 @@ const emitShortcut = (scopeMapToShortcut, scope, serializedKeys, e) => {
 };
 
 export default {
-  install(Vue) {
+  install(Vue, options) {
+    const excludeTags = options && options.excludeTags;
+    const preventWhen = options && options.preventWhen;
+
     const setOfScope = new Set();
     setOfScope.add(GLOBAL_SCOPE);
 
@@ -77,7 +79,8 @@ export default {
 
     window.addEventListener('keydown', e => {
       const $target = e.target;
-      if ($target.tagName === INPUT_TAG_NAME) return;
+      if (excludeTags && excludeTags.includes($target.tagName.toLowerCase())) return;
+      if (preventWhen && preventWhen(e)) return;
       keys.add(e.key.toLowerCase());
       // should execute once
       const serializedKeys = serailizeShortcutKeys(Array.from(keys));
@@ -92,7 +95,8 @@ export default {
 
     window.addEventListener('keyup', e => {
       const $target = e.target;
-      if ($target.tagName === INPUT_TAG_NAME) return;
+      if (excludeTags && excludeTags.includes($target.tagName.toLowerCase())) return;
+      if (preventWhen && preventWhen(e)) return;
       const lowerCased = e.key.toLowerCase();
       if (keys.has(lowerCased)) {
         keys.delete(lowerCased);
