@@ -111,22 +111,23 @@ export default {
     });
 
     // create a global method to register shortcuts
-    Vue.createShortcut = params => {
-      console.log('setOfScope', setOfScope);
-      const { scope, keyGroup, eventHandler } = params;
-      if (!scope) {
-        // register globally
-        registerKeyGroup(registeredKeys, keyGroup, scopeMapToShortcut.get(GLOBAL_SCOPE), eventHandler);
-      } else {
-        // loop scope and register on each scope
-        for (const s of scope) {
-          if (!setOfScope.has(s)) {
-            console.error(`scope: ${s} is not registered as a shortcut-scope`);
-            continue;
+    Vue.createShortcuts = (shortcuts) => {
+      shortcuts.forEach(shortcut => {
+        const { scope, keyGroup, eventHandler } = shortcut;
+        if (!scope) {
+          // register globally
+          registerKeyGroup(registeredKeys, keyGroup, scopeMapToShortcut.get(GLOBAL_SCOPE), eventHandler);
+        } else {
+          // loop scope and register on each scope
+          for (const s of scope) {
+            if (!setOfScope.has(s)) {
+              console.error(`scope: ${s} is not registered as a shortcut-scope`);
+              continue;
+            }
+            registerKeyGroup(registeredKeys, keyGroup, scopeMapToShortcut.get(s), eventHandler);
           }
-          registerKeyGroup(registeredKeys, keyGroup, scopeMapToShortcut.get(s), eventHandler);
         }
-      }
+      })
     };
   },
 };

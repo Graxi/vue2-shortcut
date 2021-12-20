@@ -12,12 +12,22 @@ import Vue from 'vue';
 export default {
   name: 'Demo',
   mounted() {
-    Vue.createShortcut({
-      keyGroup: [['ctrl', 'c']],
-      eventHandler: () => {
-        console.log('pressing ctrl + c');
+    Vue.createShortcuts([
+      {
+        keyGroup: [['ctrl', 'c']],
+        scope: ['a'],
+        eventHandler: () => {
+          console.log('pressing ctrl + c in scope a');
+        }
+      },
+      {
+        keyGroup: [['ctrl', 'a']],
+        scope: ['c'],
+        eventHandler: () => {
+          console.log('pressing ctrl + a in scope c')
+        }
       }
-    })
+    ])
   }
 }
 </script>
