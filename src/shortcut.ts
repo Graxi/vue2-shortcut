@@ -11,6 +11,7 @@ type CreateShortcutParams = {
 };
 
 const CTRL = 'ctrl'; // a virtual key to handle control
+const INPUT_TAG_NAME = 'INPUT';
 
 const SCOPE_DATA_ATTRIBUTE = 'vshortcutscope';
 const GLOBAL_SCOPE = 'GLOBAL_SCOPE';
@@ -59,13 +60,8 @@ const emitShortcut = (scopeMapToShortcut: ScopeMapToShortcut, scope: string, ser
   }
 };
 
-type CheckPreventFunction = (e?: KeyboardEvent) => boolean;
-
 export default {
-  install(Vue, options: { excludeTags: string[], preventWhen: CheckPreventFunction }) {
-    const excludeTags = options && options.excludeTags;
-    const preventWhen = options && options.preventWhen;
-
+  install(Vue) {
     const setOfScope: Set<string> = new Set();
     setOfScope.add(GLOBAL_SCOPE);
 
@@ -88,13 +84,14 @@ export default {
     });
 
     // handle keydown event
+    // prevent shortcut getting fired in input field
     const keys: Set<string> = new Set();
 
     window.addEventListener('keydown', (e: KeyboardEvent) => {
-      const $target = e.target as HTMLElement;
-      if (excludeTags && excludeTags.includes($target.tagName.toLowerCase())) return;
-      if (preventWhen && preventWhen(e)) return;
+      const $target = e.target as Element;
+      if ($target.tagName === INPUT_TAG_NAME) return;
       keys.add(e.key.toLowerCase());
+      // should execute once
       const serializedKeys = serailizeShortcutKeys(Array.from(keys));
       if (registeredKeys.has(serializedKeys)) {
         e.preventDefault();
@@ -106,9 +103,8 @@ export default {
     });
 
     window.addEventListener('keyup', (e: KeyboardEvent) => {
-      const $target = e.target as HTMLElement;
-      if (excludeTags && excludeTags.includes($target.tagName.toLowerCase())) return;
-      if (preventWhen && preventWhen(e)) return;
+      const $target = e.target as Element;
+      if ($target.tagName === INPUT_TAG_NAME) return;
       const lowerCased = e.key.toLowerCase();
       if (keys.has(lowerCased)) {
         keys.delete(lowerCased);
@@ -127,23 +123,21 @@ export default {
     });
 
     // create a global method to register shortcuts
-    Vue.createShortcuts = (shortcuts: CreateShortcutParams[]) => {
-      shortcuts.forEach((shortcut: CreateShortcutParams) => {
-        const { scope, keyGroup, eventHandler } = shortcut;
-        if (!scope) {
-          // register globally
-          registerKeyGroup(registeredKeys, keyGroup, scopeMapToShortcut.get(GLOBAL_SCOPE), eventHandler);
-        } else {
-          // loop scope and register on each scope
-          for (const s of scope) {
-            if (!setOfScope.has(s)) {
-              console.error(`scope: ${s} is not registered as a shortcut-scope`);
-              continue;
-            }
-            registerKeyGroup(registeredKeys, keyGroup, scopeMapToShortcut.get(s), eventHandler);
+    Vue.createShortcut = (params: CreateShortcutParams) => {
+      const { scope, keyGroup, eventHandler } = params;
+      if (!scope) {
+        // register globally
+        registerKeyGroup(registeredKeys, keyGroup, scopeMapToShortcut.get(GLOBAL_SCOPE), eventHandler);
+      } else {
+        // loop scope and register on each scope
+        for (const s of scope) {
+          if (!setOfScope.has(s)) {
+            console.error(`scope: ${s} is not registered as a shortcut-scope`);
+            continue;
           }
+          registerKeyGroup(registeredKeys, keyGroup, scopeMapToShortcut.get(s), eventHandler);
         }
-      })
+      }
     };
   },
 };
