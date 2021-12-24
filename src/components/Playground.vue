@@ -15,29 +15,30 @@
   </div>
 </template>
 
-<script>
-import Vue from 'vue';
-export default {
-  name: 'Demo',
-  mounted() {
-    Vue.createShortcuts([
-      {
-        keyGroup: [['ctrl', 'c']],
-        scope: ['a'],
-        eventHandler: () => {
-          console.log('pressing ctrl + c in scope a');
+<script lang='ts'>
+  import { Component, Vue } from 'vue-property-decorator';
+
+  @Component
+  export default class Playground extends Vue {
+    mounted() {
+      Vue.createShortcuts([
+        {
+          keyGroup: [['ctrl', 'c']],
+          scope: ['a'],
+          eventHandler: () => {
+            console.log('pressing ctrl + c in scope a');
+          }
+        },
+        {
+          keyGroup: [['ctrl', 'a']],
+          scope: ['c'],
+          eventHandler: () => {
+            console.log('pressing ctrl + a in scope c')
+          }
         }
-      },
-      {
-        keyGroup: [['ctrl', 'a']],
-        scope: ['c'],
-        eventHandler: () => {
-          console.log('pressing ctrl + a in scope c')
-        }
-      }
-    ])
+      ])
+    }
   }
-}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

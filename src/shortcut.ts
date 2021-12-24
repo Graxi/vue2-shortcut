@@ -4,11 +4,16 @@ type ScopeMapToShortcut = Map<string, KeysMapToEventHandler>;
 
 type Keys = string[]; // multiple keys may serve the same function
 
-type CreateShortcutParams = {
+export type CreateShortcutParams = {
   scope?: string[]; // no scope means global
   keyGroup: Keys[];
   eventHandler: Function;
 };
+
+export type Options = {
+  excludeTags?: string[];
+  preventWhen?: CheckPreventFunction
+}
 
 const CTRL = 'ctrl'; // a virtual key to handle control
 
@@ -44,6 +49,8 @@ const registerKeyGroup = (registeredKeys: Set<string>, keyGroup: Keys[], keysMap
     }
     // get the event listener
     const eventHandlerArray = keysMapToEventHandler.get(serializedKeys);
+    if (!eventHandlerArray) return;
+
     if (eventHandlerArray.indexOf(eventHandler) == -1) {
       // insert
       eventHandlerArray.push(eventHandler);
@@ -52,9 +59,13 @@ const registerKeyGroup = (registeredKeys: Set<string>, keyGroup: Keys[], keysMap
 };
 
 const emitShortcut = (scopeMapToShortcut: ScopeMapToShortcut, scope: string, serializedKeys: string, e: KeyboardEvent) => {
-  const keysMapToEventHandler: KeysMapToEventHandler = scopeMapToShortcut.get(scope);
+  const keysMapToEventHandler: KeysMapToEventHandler | undefined = scopeMapToShortcut.get(scope);
+  if (!keysMapToEventHandler) return;
+
   if (keysMapToEventHandler.has(serializedKeys)) {
     const eventHandlerArray = keysMapToEventHandler.get(serializedKeys);
+    if (!eventHandlerArray) return;
+
     eventHandlerArray.forEach((eventHandler) => eventHandler(e));
   }
 };
@@ -62,7 +73,7 @@ const emitShortcut = (scopeMapToShortcut: ScopeMapToShortcut, scope: string, ser
 type CheckPreventFunction = (e?: KeyboardEvent) => boolean;
 
 export default {
-  install(Vue, options: { excludeTags: string[], preventWhen: CheckPreventFunction }) {
+  install(Vue: any, options: Options) {
     const excludeTags = options && options.excludeTags;
     const preventWhen = options && options.preventWhen;
 
@@ -74,7 +85,7 @@ export default {
 
     const registeredKeys: Set<string> = new Set();
 
-    let activeScope = undefined;
+    let activeScope: string | undefined = undefined;
     // register event listener for click
     window.addEventListener('click', (e: MouseEvent) => {
       const $target = e.target as HTMLElement;
@@ -119,7 +130,7 @@ export default {
 
     // define two directives: shortcut scope and shotcut
     Vue.directive('shortcut-scope', {
-      bind: (el, binding) => {
+      bind: (el: HTMLElement, binding: {value: string}) => {
         setOfScope.add(binding.value);
         scopeMapToShortcut.set(binding.value, new Map());
         el.setAttribute(`data-${SCOPE_DATA_ATTRIBUTE}`, binding.value);
@@ -132,15 +143,27 @@ export default {
         const { scope, keyGroup, eventHandler } = shortcut;
         if (!scope) {
           // register globally
-          registerKeyGroup(registeredKeys, keyGroup, scopeMapToShortcut.get(GLOBAL_SCOPE), eventHandler);
+          const globalScopeMapToShortcuts = scopeMapToShortcut.get(GLOBAL_SCOPE);
+          if (!globalScopeMapToShortcuts) return;
+
+          registerKeyGroup(registeredKeys, keyGroup, globalScopeMapToShortcuts, eventHandler);
         } else {
+          if (!Array.isArray(scope)) {
+            console.error('Scope must be an array');
+            return;
+          }
+
           // loop scope and register on each scope
           for (const s of scope) {
             if (!setOfScope.has(s)) {
               console.error(`scope: ${s} is not registered as a shortcut-scope`);
               continue;
             }
-            registerKeyGroup(registeredKeys, keyGroup, scopeMapToShortcut.get(s), eventHandler);
+
+            const scopeMapToShortcuts = scopeMapToShortcut.get(s);
+            if (!scopeMapToShortcuts) return;
+
+            registerKeyGroup(registeredKeys, keyGroup, scopeMapToShortcuts, eventHandler);
           }
         }
       })

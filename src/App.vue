@@ -1,18 +1,19 @@
 <template>
   <div id="app">
-    <Demo />
+    <Playground />
   </div>
 </template>
 
-<script>
-import Demo from './components/Demo.vue'
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator';
+import Playground from './components/Playground.vue';
 
-export default {
-  name: 'App',
+@Component({
   components: {
-    Demo
-  }
-}
+    Playground
+  },
+})
+export default class App extends Vue {}
 </script>
 
 <style>
@@ -22,5 +23,6 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+  margin-top: 60px;
 }
 </style>

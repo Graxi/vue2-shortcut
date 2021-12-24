@@ -1,11 +1,12 @@
 import Vue from 'vue'
 import App from './App.vue'
-import VShortcut from './shortcut';
+import VShortcut, { Options } from './shortcut';
 
-Vue.use(VShortcut, {
+const options: Options = {
   excludeTags: ['input', 'textarea'], // optional
-  preventWhen: () => true, // optional
-});
+}
+
+Vue.use(VShortcut, options);
 
 Vue.config.productionTip = false
 
