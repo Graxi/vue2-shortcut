@@ -134,7 +134,7 @@ export default {
         setOfScope.add(binding.value);
         scopeMapToShortcut.set(binding.value, new Map());
         el.setAttribute(`data-${SCOPE_DATA_ATTRIBUTE}`, binding.value);
-      },
+      }
     });
 
     // create a global method to register shortcuts
@@ -168,5 +168,12 @@ export default {
         }
       })
     };
+
+    Vue.test = (template: any) => {
+      template.$watch(() => {
+        return this._isBeingDestroyed;
+      }, (next, prev) => {
+      })
+    }
   },
 };

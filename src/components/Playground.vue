@@ -1,5 +1,6 @@
 <template>
   <div class='container'>
+    <button @click="() => displayComponentB = false">Destroy Component B</button>
     <div class='component' v-shortcut-scope="'a'">
       <h4>Component A</h4>
       <p>
@@ -9,7 +10,7 @@
         <input type='text' />
       </p>
     </div>
-    <div class='component' v-shortcut-scope="'b'">Component B</div>
+    <ComponentB v-if="displayComponentB"/>
     <div class='component' v-shortcut-scope="'c'">Component C</div>
     <div class='component' v-shortcut-scope="'d'">Component D</div>
   </div>
@@ -17,9 +18,17 @@
 
 <script lang='ts'>
   import { Component, Vue } from 'vue-property-decorator';
+  import ComponentB from './ComponentB.vue';
 
-  @Component
+  @Component({
+    components: {
+      ComponentB
+    }
+  })
+
   export default class Playground extends Vue {
+    displayComponentB: boolean = true;
+
     mounted() {
       Vue.createShortcuts([
         {
