@@ -8,7 +8,12 @@
   @Component
   export default class ComponentB extends Vue {
     mounted() {
+      console.log('mounted B')
       Vue.test(this);
+    }
+
+    beforeDestroy() {
+      console.log('destroy B')
     }
   }
 </script>

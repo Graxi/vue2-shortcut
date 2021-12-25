@@ -169,10 +169,17 @@ export default {
       })
     };
 
+    let _isBeingDestroyed = false;
     Vue.test = (template: any) => {
-      template.$watch(() => {
-        return this._isBeingDestroyed;
-      }, (next, prev) => {
+      Object.defineProperty(template, '_isBeingDestroyed', {
+        get() {
+          return _isBeingDestroyed;
+        },
+        set(newValue) {
+          _isBeingDestroyed = newValue;
+          console.log('_isBeingDestroyed', _isBeingDestroyed);
+          // unregister events here
+        }
       })
     }
   },
