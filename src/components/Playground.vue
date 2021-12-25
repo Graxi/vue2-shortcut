@@ -1,18 +1,23 @@
 <template>
-  <div class='container'>
-    <button @click="() => displayComponentB = false">Destroy Component B</button>
-    <div class='component' v-shortcut-scope="'a'">
-      <h4>Component A</h4>
-      <p>
-        Shortcut is disabled globally in input field
-      </p>
-      <p>
-        <input type='text' />
-      </p>
+  <div>
+    <div id='toolbar'>
+      <button @click="toggleComponentB">Toggle Component B</button>
     </div>
-    <ComponentB v-if="displayComponentB"/>
-    <div class='component' v-shortcut-scope="'c'">Component C</div>
-    <div class='component' v-shortcut-scope="'d'">Component D</div>
+
+    <div class='container'>
+      <div class='component' v-shortcut-scope="'a'">
+        <h4>Component A</h4>
+        <p>
+          Shortcut is disabled globally in input field
+        </p>
+        <p>
+          <input type='text' />
+        </p>
+      </div>
+      <ComponentB v-if="loadComponentB"/>
+      <div class='component' v-shortcut-scope="'c'">Component C</div>
+      <div class='component' v-shortcut-scope="'d'">Component D</div>
+    </div>
   </div>
 </template>
 
@@ -27,10 +32,15 @@
   })
 
   export default class Playground extends Vue {
-    displayComponentB: boolean = true;
+    loadComponentB: boolean = true;
+
+    toggleComponentB() {
+      const loadComponentB = this.loadComponentB;
+      this.loadComponentB = !loadComponentB;
+    }
 
     mounted() {
-      Vue.createShortcuts([
+      Vue.createShortcuts(this, [
         {
           keyGroup: [['ctrl', 'c']],
           scope: ['a'],
@@ -61,5 +71,12 @@
 
   .component {
     border: 1px solid black;
+  }
+
+  #toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
   }
 </style>

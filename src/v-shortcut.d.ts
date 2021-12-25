@@ -3,6 +3,6 @@ import { CreateShortcutParams } from './shortcut';
 
 declare module 'vue/types/vue' {
   interface VueConstructor {
-    createShortcuts: (shortcuts: CreateShortcutParams[]) => void;
+    createShortcuts: (template: Vue, shortcuts: CreateShortcutParams[]) => void;
   }
 }

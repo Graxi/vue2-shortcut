@@ -138,7 +138,19 @@ export default {
     });
 
     // create a global method to register shortcuts
-    Vue.createShortcuts = (shortcuts: CreateShortcutParams[]) => {
+    Vue.createShortcuts = (template: any, shortcuts: CreateShortcutParams[]) => {
+      let _isBeingDestroyed = false;
+
+      Object.defineProperty(template, '_isBeingDestroyed', {
+        get() {
+          return _isBeingDestroyed;
+        },
+        set(newVal) {
+          _isBeingDestroyed = newVal;
+          // unregister events
+        },
+      });
+
       shortcuts.forEach((shortcut: CreateShortcutParams) => {
         const { scope, keyGroup, eventHandler } = shortcut;
         if (!scope) {
@@ -169,18 +181,8 @@ export default {
       })
     };
 
-    let _isBeingDestroyed = false;
-    Vue.test = (template: any) => {
-      Object.defineProperty(template, '_isBeingDestroyed', {
-        get() {
-          return _isBeingDestroyed;
-        },
-        set(newValue) {
-          _isBeingDestroyed = newValue;
-          console.log('_isBeingDestroyed', _isBeingDestroyed);
-          // unregister events here
-        }
-      })
-    }
+    
+
+
   },
 };
