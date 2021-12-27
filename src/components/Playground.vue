@@ -23,14 +23,14 @@
     mounted() {
       Vue.createShortcuts([
         {
-          keyGroup: [['ctrl', 'c']],
+          keys: ['ctrl', 'c'],
           scope: ['a'],
           eventHandler: () => {
             console.log('pressing ctrl + c in scope a');
           }
         },
         {
-          keyGroup: [['ctrl', 'a']],
+          keys: ['ctrl', 'a'],
           scope: ['c'],
           eventHandler: () => {
             console.log('pressing ctrl + a in scope c')

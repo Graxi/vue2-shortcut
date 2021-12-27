@@ -6,7 +6,7 @@ type Keys = string[]; // multiple keys may serve the same function
 
 export type CreateShortcutParams = {
   scope?: string[]; // no scope means global
-  keyGroup: Keys[];
+  keys: Keys; // for now only consider one key combo
   eventHandler: Function;
 };
 
@@ -37,24 +37,21 @@ const serailizeShortcutKeys = (keys: Keys): string => {
   return copy.join('');
 };
 
-const registerKeyGroup = (registeredKeys: Set<string>, keyGroup: Keys[], keysMapToEventHandler: KeysMapToEventHandler, eventHandler: Function) => {
-  // keys: string[]
-  for (const keys of keyGroup) {
-    const serializedKeys = serailizeShortcutKeys(keys);
-    registeredKeys.add(serializedKeys);
+const registerKeyGroup = (registeredKeys: Set<string>, keys: Keys, keysMapToEventHandler: KeysMapToEventHandler, eventHandler: Function) => {
+  const serializedKeys = serailizeShortcutKeys(keys);
+  registeredKeys.add(serializedKeys);
 
-    if (!keysMapToEventHandler.has(serializedKeys)) {
-      // init the map
-      keysMapToEventHandler.set(serializedKeys, []);
-    }
-    // get the event listener
-    const eventHandlerArray = keysMapToEventHandler.get(serializedKeys);
-    if (!eventHandlerArray) return;
+  if (!keysMapToEventHandler.has(serializedKeys)) {
+    // init the map
+    keysMapToEventHandler.set(serializedKeys, []);
+  }
+  // get the event listener
+  const eventHandlerArray = keysMapToEventHandler.get(serializedKeys);
+  if (!eventHandlerArray) return;
 
-    if (eventHandlerArray.indexOf(eventHandler) == -1) {
-      // insert
-      eventHandlerArray.push(eventHandler);
-    }
+  if (eventHandlerArray.indexOf(eventHandler) == -1) {
+    // insert
+    eventHandlerArray.push(eventHandler);
   }
 };
 
@@ -140,13 +137,13 @@ export default {
     // create a global method to register shortcuts
     Vue.createShortcuts = (shortcuts: CreateShortcutParams[]) => {
       shortcuts.forEach((shortcut: CreateShortcutParams) => {
-        const { scope, keyGroup, eventHandler } = shortcut;
+        const { scope, keys, eventHandler } = shortcut;
         if (!scope) {
           // register globally
           const globalScopeMapToShortcuts = scopeMapToShortcut.get(GLOBAL_SCOPE);
           if (!globalScopeMapToShortcuts) return;
 
-          registerKeyGroup(registeredKeys, keyGroup, globalScopeMapToShortcuts, eventHandler);
+          registerKeyGroup(registeredKeys, keys, globalScopeMapToShortcuts, eventHandler);
         } else {
           if (!Array.isArray(scope)) {
             console.error('Scope must be an array');
@@ -163,7 +160,7 @@ export default {
             const scopeMapToShortcuts = scopeMapToShortcut.get(s);
             if (!scopeMapToShortcuts) return;
 
-            registerKeyGroup(registeredKeys, keyGroup, scopeMapToShortcuts, eventHandler);
+            registerKeyGroup(registeredKeys, keys, scopeMapToShortcuts, eventHandler);
           }
         }
       })
