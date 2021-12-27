@@ -9,9 +9,15 @@
         <input type='text' />
       </p>
     </div>
-    <div class='component' v-shortcut-scope="'b'">Component B</div>
-    <div class='component' v-shortcut-scope="'c'">Component C</div>
-    <div class='component' v-shortcut-scope="'d'">Component D</div>
+    <div class='component' v-shortcut-scope="'b'">
+      <h4>Component B</h4>
+    </div>
+    <div class='component' v-shortcut-scope="'c'">
+      <h4>Component C</h4>
+    </div>
+    <div class='component' v-shortcut-scope="'d'">
+      <h4>Component D</h4>
+    </div>
   </div>
 </template>
 
@@ -27,7 +33,18 @@
           scope: ['a'],
           eventHandler: () => {
             console.log('pressing ctrl + c in scope a');
+            console.log('executed repeatedly');
+            console.log('*************');
           }
+        },
+        {
+          keys: ['ctrl', 'c'],
+          eventHandler: () => {
+            console.log('pressing ctrl + c in global scope');
+            console.log('executed once');
+            console.log('*************');
+          },
+          once: true
         },
         {
           keys: ['ctrl', 'a'],
