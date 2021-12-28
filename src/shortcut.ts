@@ -9,6 +9,10 @@ type ScopeMapToShortcut = Map<string, KeysMapToEventHandler>;
 
 type Keys = string[]; // multiple keys may serve the same function
 
+export type ShortcutsList = {
+  [scope: string]: Keys
+}
+
 export type CreateShortcutParams = {
   scope?: string[]; // no scope means global
   keys: Keys; // for now only consider one key combo
@@ -95,6 +99,8 @@ export default {
     scopeMapToShortcut.set(GLOBAL_SCOPE, new Map());
 
     const registeredKeys: Set<string> = new Set();
+
+    const keysMapping: Map<string, string[]> = new Map(); // serializedKeys map to original keys
 
     let activeScope: string | undefined = undefined;
     // register event listener for click
@@ -186,5 +192,19 @@ export default {
         }
       })
     };
-  },
+
+    // get all shortcuts
+    Vue.getAvailableShortcuts = (): ShortcutsList => {
+      const shortcuts: ShortcutsList = {};
+
+      for(const [scope, shortcutsForScope] of scopeMapToShortcut) {
+        shortcuts[scope] = [];
+        for(const eventHandler of shortcutsForScope.values()) {
+          //
+        }
+      }
+
+      return shortcuts;
+    }
+  }
 };

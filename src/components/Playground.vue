@@ -1,22 +1,25 @@
 <template>
-  <div class='container'>
-    <div class='component' v-shortcut-scope="'a'">
-      <h4>Component A</h4>
-      <p>
-        Shortcut is disabled globally in input field
-      </p>
-      <p>
-        <input type='text' />
-      </p>
-    </div>
-    <div class='component' v-shortcut-scope="'b'">
-      <h4>Component B</h4>
-    </div>
-    <div class='component' v-shortcut-scope="'c'">
-      <h4>Component C</h4>
-    </div>
-    <div class='component' v-shortcut-scope="'d'">
-      <h4>Component D</h4>
+  <div>
+    <button @click="printShortcuts">Print available shortcuts in console</button>
+    <div class='container'>
+      <div class='component' v-shortcut-scope="'a'">
+        <h4>Component A</h4>
+        <p>
+          Shortcut is disabled globally in input field
+        </p>
+        <p>
+          <input type='text' />
+        </p>
+      </div>
+      <div class='component' v-shortcut-scope="'b'">
+        <h4>Component B</h4>
+      </div>
+      <div class='component' v-shortcut-scope="'c'">
+        <h4>Component C</h4>
+      </div>
+      <div class='component' v-shortcut-scope="'d'">
+        <h4>Component D</h4>
+      </div>
     </div>
   </div>
 </template>
@@ -26,6 +29,11 @@
 
   @Component
   export default class Playground extends Vue {
+
+    printShortcuts() {
+      console.log(Vue.getAvailableShortcuts());
+    }
+
     mounted() {
       Vue.createShortcuts([
         {
