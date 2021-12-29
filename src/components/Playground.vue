@@ -61,10 +61,18 @@
             console.log('pressing ctrl + a in scope c')
           }
         },
+        // space key
         {
           keys: ['a', ' '],
           eventHandler: () => {
             console.log('pressing space in global scope');
+          }
+        },
+        // special keys: , or . or \(should use \\ to escape \) or /
+        {
+          keys: ['\\', 'a'],
+          eventHandler: () => {
+            console.log('pressing \\ in global scope');
           }
         }
       ])
