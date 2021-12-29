@@ -60,6 +60,12 @@
           eventHandler: () => {
             console.log('pressing ctrl + a in scope c')
           }
+        },
+        {
+          keys: ['a', ' '],
+          eventHandler: () => {
+            console.log('pressing space in global scope');
+          }
         }
       ])
     }
