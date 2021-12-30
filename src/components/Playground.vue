@@ -2,8 +2,8 @@
   <div>
     <div id='toolbar'>
       <button @click="toggleComponentB">Toggle Component B</button>
+      <button @click="printShortcuts">Print available shortcuts in console</button>
     </div>
-
     <div class='container'>
       <div class='component' v-shortcut-scope="'a'">
         <h4>Component A</h4>
@@ -15,8 +15,12 @@
         </p>
       </div>
       <ComponentB v-if="loadComponentB"/>
-      <div class='component' v-shortcut-scope="'c'">Component C</div>
-      <div class='component' v-shortcut-scope="'d'">Component D</div>
+      <div class='component' v-shortcut-scope="'c'">
+        <h4>Component C</h4>
+      </div>
+      <div class='component' v-shortcut-scope="'d'">
+        <h4>Component D</h4>
+      </div>
     </div>
   </div>
 </template>
@@ -39,20 +43,49 @@
       this.loadComponentB = !loadComponentB;
     }
 
+    printShortcuts() {
+      console.log(Vue.getAvailableShortcuts());
+    }
+
     mounted() {
       Vue.createShortcuts(this, [
         {
-          keyGroup: [['ctrl', 'c']],
+          keys: ['ctrl', 'c'],
           scope: ['a'],
           eventHandler: () => {
             console.log('pressing ctrl + c in scope a');
+            console.log('executed repeatedly');
+            console.log('*************');
           }
         },
         {
-          keyGroup: [['ctrl', 'a']],
+          keys: ['ctrl', 'c'],
+          eventHandler: () => {
+            console.log('pressing ctrl + c in global scope');
+            console.log('executed once');
+            console.log('*************');
+          },
+          once: true
+        },
+        {
+          keys: ['ctrl', 'a'],
           scope: ['c'],
           eventHandler: () => {
             console.log('pressing ctrl + a in scope c')
+          }
+        },
+        // space key
+        {
+          keys: ['a', ' '],
+          eventHandler: () => {
+            console.log('pressing space in global scope');
+          }
+        },
+        // special keys: , or . or \(should use \\ to escape \) or /
+        {
+          keys: ['\\', 'a'],
+          eventHandler: () => {
+            console.log('pressing \\ in global scope');
           }
         }
       ])

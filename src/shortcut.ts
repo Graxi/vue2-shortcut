@@ -1,13 +1,23 @@
-type KeysMapToEventHandler = Map<string, Function[]>;
+type EventHandler = {
+  func: Function;
+  once?: boolean;
+}
+
+type KeysMapToEventHandler = Map<string, EventHandler[]>;
 
 type ScopeMapToShortcut = Map<string, KeysMapToEventHandler>;
 
 type Keys = string[]; // multiple keys may serve the same function
 
+export type ShortcutsList = {
+  [scope: string]: { keys: Keys }[];
+}
+
 export type CreateShortcutParams = {
   scope?: string[]; // no scope means global
-  keyGroup: Keys[];
+  keys: Keys; // for now only consider one key combo
   eventHandler: Function;
+  once?: boolean;
 };
 
 export type Options = {
@@ -37,28 +47,26 @@ const serailizeShortcutKeys = (keys: Keys): string => {
   return copy.join('');
 };
 
-const registerKeyGroup = (registeredKeys: Set<string>, keyGroup: Keys[], keysMapToEventHandler: KeysMapToEventHandler, eventHandler: Function) => {
-  // keys: string[]
-  for (const keys of keyGroup) {
-    const serializedKeys = serailizeShortcutKeys(keys);
-    registeredKeys.add(serializedKeys);
+const registerKeyGroup = (serializedKeys: string, keysMapToEventHandler: KeysMapToEventHandler, eventHandler: Function, once: boolean=false) => {
+  if (!keysMapToEventHandler.has(serializedKeys)) {
+    // init the map
+    keysMapToEventHandler.set(serializedKeys, []);
+  }
+  // get the event listener
+  const eventHandlerArray = keysMapToEventHandler.get(serializedKeys);
+  if (!eventHandlerArray) return;
 
-    if (!keysMapToEventHandler.has(serializedKeys)) {
-      // init the map
-      keysMapToEventHandler.set(serializedKeys, []);
-    }
-    // get the event listener
-    const eventHandlerArray = keysMapToEventHandler.get(serializedKeys);
-    if (!eventHandlerArray) return;
-
-    if (eventHandlerArray.indexOf(eventHandler) == -1) {
-      // insert
-      eventHandlerArray.push(eventHandler);
-    }
+  const eventHandlerExists = eventHandlerArray.find(_ => _.func === eventHandler)
+  if (!eventHandlerExists) {
+    // insert
+    eventHandlerArray.push({
+      func: eventHandler,
+      once
+    });
   }
 };
 
-const emitShortcut = (scopeMapToShortcut: ScopeMapToShortcut, scope: string, serializedKeys: string, e: KeyboardEvent) => {
+const emitShortcut = (scopeMapToShortcut: ScopeMapToShortcut, scope: string, serializedKeys: string, e: KeyboardEvent, blockedEventHandlers: Set<EventHandler>) => {
   const keysMapToEventHandler: KeysMapToEventHandler | undefined = scopeMapToShortcut.get(scope);
   if (!keysMapToEventHandler) return;
 
@@ -66,7 +74,11 @@ const emitShortcut = (scopeMapToShortcut: ScopeMapToShortcut, scope: string, ser
     const eventHandlerArray = keysMapToEventHandler.get(serializedKeys);
     if (!eventHandlerArray) return;
 
-    eventHandlerArray.forEach((eventHandler) => eventHandler(e));
+    eventHandlerArray.forEach((eventHandler) => {
+      if (blockedEventHandlers.has(eventHandler)) return;
+      eventHandler.func(e);
+      if (eventHandler.once) blockedEventHandlers.add(eventHandler);
+    });
   }
 };
 
@@ -83,7 +95,7 @@ export default {
     const scopeMapToShortcut: ScopeMapToShortcut = new Map();
     scopeMapToShortcut.set(GLOBAL_SCOPE, new Map());
 
-    const registeredKeys: Set<string> = new Set();
+    const keysMapping: Map<string, Keys> = new Map(); // serializedKeys map to original keys
 
     let activeScope: string | undefined = undefined;
     // register event listener for click
@@ -101,18 +113,25 @@ export default {
     // handle keydown event
     const keys: Set<string> = new Set();
 
+    // used for eventHandler only executed once
+    const blockedEventHandlers: Set<EventHandler> = new Set();
+
     window.addEventListener('keydown', (e: KeyboardEvent) => {
       const $target = e.target as HTMLElement;
       if (excludeTags && excludeTags.includes($target.tagName.toLowerCase())) return;
       if (preventWhen && preventWhen(e)) return;
+      
+      // reset blockedEventHandlers when keys are changed
+      if (!keys.has(e.key)) blockedEventHandlers.clear();
+
       keys.add(e.key.toLowerCase());
       const serializedKeys = serailizeShortcutKeys(Array.from(keys));
-      if (registeredKeys.has(serializedKeys)) {
+      if (keysMapping.has(serializedKeys)) {
         e.preventDefault();
         // emit activeScope events
-        if (activeScope) emitShortcut(scopeMapToShortcut, activeScope, serializedKeys, e);
+        if (activeScope) emitShortcut(scopeMapToShortcut, activeScope, serializedKeys, e, blockedEventHandlers);
         // emit global scope events
-        emitShortcut(scopeMapToShortcut, GLOBAL_SCOPE, serializedKeys, e);
+        emitShortcut(scopeMapToShortcut, GLOBAL_SCOPE, serializedKeys, e, blockedEventHandlers);
       }
     });
 
@@ -123,7 +142,7 @@ export default {
       const lowerCased = e.key.toLowerCase();
       if (keys.has(lowerCased)) {
         keys.delete(lowerCased);
-        // when holding Meta key, releasing other keys would not fire keyup
+        // when holding Meta key, releasing other keys would not fire keyup until you release Meta key
         if (lowerCased === 'meta' && keys.size) keys.clear();
       }
     });
@@ -138,10 +157,10 @@ export default {
     });
 
     // create a global method to register shortcuts
-    Vue.createShortcuts = (template: any, shortcuts: CreateShortcutParams[]) => {
+    Vue.createShortcuts = (component: any, shortcuts: CreateShortcutParams[]) => {
       let _isBeingDestroyed = false;
 
-      Object.defineProperty(template, '_isBeingDestroyed', {
+      Object.defineProperty(component, '_isBeingDestroyed', {
         get() {
           return _isBeingDestroyed;
         },
@@ -152,13 +171,17 @@ export default {
       });
 
       shortcuts.forEach((shortcut: CreateShortcutParams) => {
-        const { scope, keyGroup, eventHandler } = shortcut;
+        const { scope, keys, eventHandler, once } = shortcut;
+        // serialize keys
+        const serializedKeys = serailizeShortcutKeys(keys);
+
         if (!scope) {
           // register globally
           const globalScopeMapToShortcuts = scopeMapToShortcut.get(GLOBAL_SCOPE);
           if (!globalScopeMapToShortcuts) return;
 
-          registerKeyGroup(registeredKeys, keyGroup, globalScopeMapToShortcuts, eventHandler);
+          keysMapping.set(serializedKeys, keys);          
+          registerKeyGroup(serializedKeys, globalScopeMapToShortcuts, eventHandler, once);
         } else {
           if (!Array.isArray(scope)) {
             console.error('Scope must be an array');
@@ -175,14 +198,30 @@ export default {
             const scopeMapToShortcuts = scopeMapToShortcut.get(s);
             if (!scopeMapToShortcuts) return;
 
-            registerKeyGroup(registeredKeys, keyGroup, scopeMapToShortcuts, eventHandler);
+            keysMapping.set(serializedKeys, keys);
+            registerKeyGroup(serializedKeys, scopeMapToShortcuts, eventHandler, once);
           }
         }
       })
     };
 
-    
+    // get all shortcuts
+    Vue.getAvailableShortcuts = (): ShortcutsList => {
+      const shortcuts: ShortcutsList = {};
 
+      for(const [scope, shortcutsForScope] of scopeMapToShortcut) {
+        shortcuts[scope] = [];
+        for(const serializedKeys of shortcutsForScope.keys()) {
+          const originalKeys: Keys | undefined = keysMapping.get(serializedKeys);
+          if (originalKeys) {
+            shortcuts[scope].push({
+              keys: originalKeys
+            })
+          }
+        }
+      }
 
-  },
+      return shortcuts;
+    }
+  }
 };
