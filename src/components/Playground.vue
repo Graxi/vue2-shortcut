@@ -87,6 +87,19 @@
           eventHandler: () => {
             console.log('pressing \\ in global scope');
           }
+        },
+        // keys start with shift
+        {
+          keys: ['shift', '1'],
+          eventHandler: () => {
+            console.log('pressing shift + 1 in global scope');
+          }
+        },
+        {
+          keys: ['ctrl', 'shift', '1'],
+          eventHandler: () => {
+            console.log('pressing ctrl + shift + 1 in global scope');
+          }
         }
       ])
     }

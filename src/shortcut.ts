@@ -1,3 +1,5 @@
+import { CTRL, SCOPE_DATA_ATTRIBUTE, GLOBAL_SCOPE, getShiftConvertKey, SHIFT } from './constants';
+
 type EventHandler = {
   func: Function;
   once?: boolean;
@@ -25,11 +27,6 @@ export type Options = {
   preventWhen?: CheckPreventFunction
 }
 
-const CTRL = 'ctrl'; // a virtual key to handle control
-
-const SCOPE_DATA_ATTRIBUTE = 'vshortcutscope';
-const GLOBAL_SCOPE = 'GLOBAL_SCOPE';
-
 const isMac = navigator.platform.toUpperCase().indexOf('MAC') > -1;
 
 /**
@@ -46,6 +43,17 @@ const serailizeShortcutKeys = (keys: Keys): string => {
   copy.sort();
   return copy.join('');
 };
+
+/**
+ * process [shift, x] keys
+ * need to convert keys following the shift key
+ */
+const processShiftCombination = (keys: Keys) => {
+  const indexOfShift = keys.indexOf(SHIFT);
+  if (indexOfShift !== 0) return;
+  const keyAfterShift: string = keys[indexOfShift + 1];
+  keys.splice(indexOfShift + 1, 1, getShiftConvertKey(keyAfterShift) || keyAfterShift);
+}
 
 const registerKeys = (serializedKeys: string, keysMapToEventHandler: KeysMapToEventHandler, eventHandler: Function, once: boolean=false) => {
   if (!keysMapToEventHandler.has(serializedKeys)) {
@@ -191,6 +199,10 @@ export default {
     const addOrRemoveShortcuts = (shortcuts: CreateShortcutParams[], remove: boolean) => {
       shortcuts.forEach((shortcut: CreateShortcutParams) => {
         const { scope, keys, eventHandler, once } = shortcut;
+        
+        // process keys with shift combination
+        processShiftCombination(keys);
+
         // serialize keys
         const serializedKeys = serailizeShortcutKeys(keys);
         if (!scope) {
