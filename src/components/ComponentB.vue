@@ -1,8 +1,8 @@
 <template>
   <div class='component' v-shortcut-scope="'b'">
     Component B
-    <p>Component B 下注册的全局快捷键为 ctrl + b</p>
-    <p>当Component B被销毁时 ctrl + b快捷键应该被删除</p>
+    <p>Component B 下注册的 1) 全局快捷键为 ctrl + b 2) 局部快捷键为 ctrl + d</p>
+    <p>当Component B被销毁时 1) ctrl + b快捷键应该被删除 2) ctrl + d快捷键应该被删除</p>
   </div>
 </template>
 
@@ -15,16 +15,19 @@
       console.log('mounted B')
       Vue.createShortcuts(this, [
         {
-          keyGroup: [['ctrl', 'b']],
+          keys: ['ctrl', 'b'],
           eventHandler: () => {
             console.log('pressing ctrl + b in global scope');
           }
+        },
+        {
+          keys: ['ctrl', 'd'],
+          scope: ['b'],
+          eventHandler: () => {
+            console.log('pressing ctrl + d in b scope');
+          }
         }
       ])
-    }
-
-    beforeDestroy() {
-      console.log('destroy B')
     }
   }
 </script>
