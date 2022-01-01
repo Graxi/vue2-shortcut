@@ -50,7 +50,7 @@
     mounted() {
       Vue.createShortcuts(this, [
         {
-          keys: ['ctrl', 'c'],
+          keys: ['Ctrl', 'KeyC'],
           scope: ['a'],
           eventHandler: () => {
             console.log('pressing ctrl + c in scope a');
@@ -59,7 +59,7 @@
           }
         },
         {
-          keys: ['ctrl', 'c'],
+          keys: ['Ctrl', 'KeyC'],
           eventHandler: () => {
             console.log('pressing ctrl + c in global scope');
             console.log('executed once');
@@ -68,7 +68,7 @@
           once: true
         },
         {
-          keys: ['ctrl', 'a'],
+          keys: ['Ctrl', 'KeyA'],
           scope: ['c'],
           eventHandler: () => {
             console.log('pressing ctrl + a in scope c')
@@ -76,29 +76,36 @@
         },
         // space key
         {
-          keys: ['a', ' '],
+          keys: ['KeyA', 'Space'],
           eventHandler: () => {
-            console.log('pressing space in global scope');
+            console.log('pressing a + space in global scope');
           }
         },
-        // special keys: , or . or \(should use \\ to escape \) or /
+        // special keys: , or . or \
         {
-          keys: ['\\', 'a'],
+          keys: ['Backslash', 'KeyA'],
           eventHandler: () => {
-            console.log('pressing \\ in global scope');
+            console.log('pressing \\ + a in global scope');
           }
         },
         // keys start with shift
         {
-          keys: ['shift', '1'],
+          keys: ['Shift', 'Digit1'],
           eventHandler: () => {
             console.log('pressing shift + 1 in global scope');
           }
         },
         {
-          keys: ['ctrl', 'shift', '1'],
+          keys: ['Ctrl', 'Shift', 'Digit1'],
           eventHandler: () => {
             console.log('pressing ctrl + shift + 1 in global scope');
+          }
+        },
+        // keys with alt
+        {
+          keys: ['Alt', 'Digit1'],
+          eventHandler: () => {
+            console.log('pressing alt + 1 in global scope');
           }
         }
       ])

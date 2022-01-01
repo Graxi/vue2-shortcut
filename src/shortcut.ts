@@ -1,4 +1,4 @@
-import { CTRL, SCOPE_DATA_ATTRIBUTE, GLOBAL_SCOPE, getShiftConvertKey, SHIFT } from './constants';
+import { CTRL, META, CONTROL, SCOPE_DATA_ATTRIBUTE, GLOBAL_SCOPE, USE_EVENT_KEY_ARRAY } from './constants';
 
 type EventHandler = {
   func: Function;
@@ -36,7 +36,7 @@ const isMac = navigator.platform.toUpperCase().indexOf('MAC') > -1;
 const serailizeShortcutKeys = (keys: Keys): string => {
   const copy = [...keys];
   // handle cmd/control
-  const metaOrControl = isMac ? 'meta' : 'control';
+  const metaOrControl = isMac ? META : CONTROL;
   const indexOfCtrl = keys.indexOf(CTRL);
   if (indexOfCtrl !== -1) copy.splice(indexOfCtrl, 1, metaOrControl);
   // sort the keys
@@ -44,16 +44,7 @@ const serailizeShortcutKeys = (keys: Keys): string => {
   return copy.join('');
 };
 
-/**
- * process [shift, x] keys
- * need to convert keys following the shift key
- */
-const processShiftCombination = (keys: Keys) => {
-  const indexOfShift = keys.indexOf(SHIFT);
-  if (indexOfShift !== 0) return;
-  const keyAfterShift: string = keys[indexOfShift + 1];
-  keys.splice(indexOfShift + 1, 1, getShiftConvertKey(keyAfterShift) || keyAfterShift);
-}
+
 
 const registerKeys = (serializedKeys: string, keysMapToEventHandler: KeysMapToEventHandler, eventHandler: Function, once: boolean=false) => {
   if (!keysMapToEventHandler.has(serializedKeys)) {
@@ -104,6 +95,13 @@ const emitShortcut = (scopeMapToShortcut: ScopeMapToShortcut, scope: string, ser
   }
 };
 
+/**
+ * use e.code as event key except those from USE_EVENT_KEY_ARRAY
+ */
+const getEventKey = (e: KeyboardEvent): string => {
+  return USE_EVENT_KEY_ARRAY.includes(e.key) ? e.key : e.code;
+}
+
 type CheckPreventFunction = (e?: KeyboardEvent) => boolean;
 
 export default {
@@ -142,11 +140,13 @@ export default {
       const $target = e.target as HTMLElement;
       if (excludeTags && excludeTags.includes($target.tagName.toLowerCase())) return;
       if (preventWhen && preventWhen(e)) return;
-      
-      // reset blockedEventHandlers when keys are changed
-      if (!keys.has(e.key)) blockedEventHandlers.clear();
 
-      keys.add(e.key.toLowerCase());
+      const eventKey = getEventKey(e);
+
+      // reset blockedEventHandlers when keys are changed
+      if (!keys.has(eventKey)) blockedEventHandlers.clear();
+
+      keys.add(eventKey);
       const serializedKeys = serailizeShortcutKeys(Array.from(keys));
       if (keysMapping.has(serializedKeys)) {
         e.preventDefault();
@@ -161,11 +161,13 @@ export default {
       const $target = e.target as HTMLElement;
       if (excludeTags && excludeTags.includes($target.tagName.toLowerCase())) return;
       if (preventWhen && preventWhen(e)) return;
-      const lowerCased = e.key.toLowerCase();
-      if (keys.has(lowerCased)) {
-        keys.delete(lowerCased);
+
+      const eventKey = getEventKey(e);
+
+      if (keys.has(eventKey)) {
+        keys.delete(eventKey);
         // when holding Meta key, releasing other keys would not fire keyup until you release Meta key
-        if (lowerCased === 'meta' && keys.size) keys.clear();
+        if (eventKey === META && keys.size) keys.clear();
       }
     });
 
@@ -200,9 +202,6 @@ export default {
       shortcuts.forEach((shortcut: CreateShortcutParams) => {
         const { scope, keys, eventHandler, once } = shortcut;
         
-        // process keys with shift combination
-        processShiftCombination(keys);
-
         // serialize keys
         const serializedKeys = serailizeShortcutKeys(keys);
         if (!scope) {

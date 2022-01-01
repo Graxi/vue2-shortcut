@@ -15,13 +15,13 @@
       console.log('mounted B')
       Vue.createShortcuts(this, [
         {
-          keys: ['ctrl', 'b'],
+          keys: ['Ctrl', 'KeyB'],
           eventHandler: () => {
             console.log('pressing ctrl + b in global scope');
           }
         },
         {
-          keys: ['ctrl', 'd'],
+          keys: ['Ctrl', 'KeyD'],
           scope: ['b'],
           eventHandler: () => {
             console.log('pressing ctrl + d in b scope');
