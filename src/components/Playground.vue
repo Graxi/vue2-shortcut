@@ -22,12 +22,25 @@
         <h4>Component D</h4>
       </div>
     </div>
+
+    <div id='test'>
+      <h4>Shortcuts Manual Test in GLOBAL SCOPE</h4>
+
+      <p v-for="(shortcut, index) in manualTestShortcuts" :key="index">{{shortcut}}</p>
+
+    </div>
   </div>
 </template>
 
 <script lang='ts'>
   import { Component, Vue } from 'vue-property-decorator';
   import ComponentB from './ComponentB.vue';
+
+  // only for manual testing
+  const FIGMA_SHORTCUTS = [
+    ['Ctrl', 'KeyC'],
+    ['Ctrl', 'KeyB']
+  ]
 
   @Component({
     components: {
@@ -37,6 +50,8 @@
 
   export default class Playground extends Vue {
     loadComponentB: boolean = true;
+
+    manualTestShortcuts: string[][] = [...FIGMA_SHORTCUTS];
 
     toggleComponentB() {
       const loadComponentB = this.loadComponentB;
@@ -48,67 +63,78 @@
     }
 
     mounted() {
-      Vue.createShortcuts(this, [
-        {
-          keys: ['Ctrl', 'KeyC'],
-          scope: ['a'],
-          eventHandler: () => {
-            console.log('pressing ctrl + c in scope a');
-            console.log('executed repeatedly');
-            console.log('*************');
-          }
-        },
-        {
-          keys: ['Ctrl', 'KeyC'],
-          eventHandler: () => {
-            console.log('pressing ctrl + c in global scope');
-            console.log('executed once');
-            console.log('*************');
-          },
-          once: true
-        },
-        {
-          keys: ['Ctrl', 'KeyA'],
-          scope: ['c'],
-          eventHandler: () => {
-            console.log('pressing ctrl + a in scope c')
-          }
-        },
-        // space key
-        {
-          keys: ['KeyA', 'Space'],
-          eventHandler: () => {
-            console.log('pressing a + space in global scope');
-          }
-        },
-        // special keys: , or . or \
-        {
-          keys: ['Backslash', 'KeyA'],
-          eventHandler: () => {
-            console.log('pressing \\ + a in global scope');
-          }
-        },
-        // keys start with shift
-        {
-          keys: ['Shift', 'Digit1'],
-          eventHandler: () => {
-            console.log('pressing shift + 1 in global scope');
-          }
-        },
-        {
-          keys: ['Ctrl', 'Shift', 'Digit1'],
-          eventHandler: () => {
-            console.log('pressing ctrl + shift + 1 in global scope');
-          }
-        },
-        // keys with alt
-        {
-          keys: ['Alt', 'Digit1'],
-          eventHandler: () => {
-            console.log('pressing alt + 1 in global scope');
-          }
+      // section for quick testing keys combo
+      Vue.createShortcuts(this, this.manualTestShortcuts.map(shortcut => ({
+        keys: shortcut,
+        eventHandler: () => {
+          console.log(`pressing ${shortcut.join('+')}`);
+
+          const idx = this.manualTestShortcuts.indexOf(shortcut);
+          if (idx !== -1) this.manualTestShortcuts.splice(idx, 1);
         }
-      ])
+      })))
+
+      // Vue.createShortcuts(this, [
+      //   {
+      //     keys: ['Ctrl', 'KeyC'],
+      //     scope: ['a'],
+      //     eventHandler: () => {
+      //       console.log('pressing ctrl + c in scope a');
+      //       console.log('executed repeatedly');
+      //       console.log('*************');
+      //     }
+      //   },
+      //   {
+      //     keys: ['Ctrl', 'KeyC'],
+      //     eventHandler: () => {
+      //       console.log('pressing ctrl + c in global scope');
+      //       console.log('executed once');
+      //       console.log('*************');
+      //     },
+      //     once: true
+      //   },
+      //   {
+      //     keys: ['Ctrl', 'KeyA'],
+      //     scope: ['c'],
+      //     eventHandler: () => {
+      //       console.log('pressing ctrl + a in scope c')
+      //     }
+      //   },
+      //   // space key
+      //   {
+      //     keys: ['KeyA', 'Space'],
+      //     eventHandler: () => {
+      //       console.log('pressing a + space in global scope');
+      //     }
+      //   },
+      //   // special keys: , or . or \
+      //   {
+      //     keys: ['Backslash', 'KeyA'],
+      //     eventHandler: () => {
+      //       console.log('pressing \\ + a in global scope');
+      //     }
+      //   },
+      //   // keys start with shift
+      //   {
+      //     keys: ['Shift', 'Digit1'],
+      //     eventHandler: () => {
+      //       console.log('pressing shift + 1 in global scope');
+      //     }
+      //   },
+      //   {
+      //     keys: ['Ctrl', 'Shift', 'Digit1'],
+      //     eventHandler: () => {
+      //       console.log('pressing ctrl + shift + 1 in global scope');
+      //     }
+      //   },
+      //   // keys with alt
+      //   {
+      //     keys: ['Alt', 'Digit1'],
+      //     eventHandler: () => {
+      //       console.log('pressing alt + 1 in global scope');
+      //     }
+      //   }
+      // ])
     }
   }
 </script>
