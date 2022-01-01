@@ -63,6 +63,23 @@
     }
 
     mounted() {
+      // section for testing ordered and unordered keys
+      Vue.createShortcuts(this, [
+        {
+          keys: ['Ctrl', 'KeyE'],
+          eventHandler: () => {
+            console.log('pressing ctrl + e in order');
+          },
+        },
+        {
+          keys: ['Ctrl', 'KeyE'],
+          eventHandler: () => {
+            console.log('pressing ctrl + e regardless of order');
+          },
+          unOrdered: true
+        }
+      ])
+
       // section for quick testing keys combo
       Vue.createShortcuts(this, this.manualTestShortcuts.map(shortcut => ({
         keys: shortcut,

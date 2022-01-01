@@ -20,6 +20,7 @@ export type CreateShortcutParams = {
   keys: Keys; // for now only consider one key combo
   eventHandler: Function;
   once?: boolean;
+  unOrdered?: boolean
 };
 
 export type Options = {
@@ -33,18 +34,16 @@ const isMac = navigator.platform.toUpperCase().indexOf('MAC') > -1;
  * serialize list of keys to string as key of the map
  * 1) sort the keys 2) handle cmd/ctrl based on isMac
  */
-const serailizeShortcutKeys = (keys: Keys): string => {
+const serializeShortcutKeys = (keys: Keys, unOrdered = false): string => {
   const copy = [...keys];
   // handle cmd/control
   const metaOrControl = isMac ? META : CONTROL;
   const indexOfCtrl = keys.indexOf(CTRL);
   if (indexOfCtrl !== -1) copy.splice(indexOfCtrl, 1, metaOrControl);
-  // sort the keys
-  copy.sort();
-  return copy.join('');
+
+  if (unOrdered) copy.sort(); // if unOrdered sort the keys
+  return unOrdered ? copy.join('+') : copy.join(',');
 };
-
-
 
 const registerKeys = (serializedKeys: string, keysMapToEventHandler: KeysMapToEventHandler, eventHandler: Function, once: boolean=false) => {
   if (!keysMapToEventHandler.has(serializedKeys)) {
@@ -131,7 +130,7 @@ export default {
     });
 
     // handle keydown event
-    const keys: Set<string> = new Set();
+    const pressedKeys: Set<string> = new Set();
 
     // used for eventHandler only executed once
     const blockedEventHandlers: Set<EventHandler> = new Set();
@@ -144,17 +143,24 @@ export default {
       const eventKey = getEventKey(e);
 
       // reset blockedEventHandlers when keys are changed
-      if (!keys.has(eventKey)) blockedEventHandlers.clear();
+      if (!pressedKeys.has(eventKey)) blockedEventHandlers.clear();
 
-      keys.add(eventKey);
-      const serializedKeys = serailizeShortcutKeys(Array.from(keys));
-      if (keysMapping.has(serializedKeys)) {
-        e.preventDefault();
-        // emit activeScope events
-        if (activeScope) emitShortcut(scopeMapToShortcut, activeScope, serializedKeys, e, blockedEventHandlers);
-        // emit global scope events
-        emitShortcut(scopeMapToShortcut, GLOBAL_SCOPE, serializedKeys, e, blockedEventHandlers);
-      }
+      pressedKeys.add(eventKey);
+
+      const serializedKeysArray = [
+        serializeShortcutKeys(Array.from(pressedKeys), true),
+        serializeShortcutKeys(Array.from(pressedKeys), false)
+      ];
+
+      serializedKeysArray.forEach((serializedKeys: string) => {
+        if (keysMapping.has(serializedKeys)) {
+          e.preventDefault();
+          // emit activeScope events
+          if (activeScope) emitShortcut(scopeMapToShortcut, activeScope, serializedKeys, e, blockedEventHandlers);
+          // emit global scope events
+          emitShortcut(scopeMapToShortcut, GLOBAL_SCOPE, serializedKeys, e, blockedEventHandlers);
+        }
+      })
     });
 
     window.addEventListener('keyup', (e: KeyboardEvent) => {
@@ -164,10 +170,10 @@ export default {
 
       const eventKey = getEventKey(e);
 
-      if (keys.has(eventKey)) {
-        keys.delete(eventKey);
+      if (pressedKeys.has(eventKey)) {
+        pressedKeys.delete(eventKey);
         // when holding Meta key, releasing other keys would not fire keyup until you release Meta key
-        if (eventKey === META && keys.size) keys.clear();
+        if (eventKey === META && pressedKeys.size) pressedKeys.clear();
       }
     });
 
@@ -200,10 +206,10 @@ export default {
 
     const addOrRemoveShortcuts = (shortcuts: CreateShortcutParams[], remove: boolean) => {
       shortcuts.forEach((shortcut: CreateShortcutParams) => {
-        const { scope, keys, eventHandler, once } = shortcut;
+        const { scope, keys, eventHandler, once, unOrdered } = shortcut;
         
         // serialize keys
-        const serializedKeys = serailizeShortcutKeys(keys);
+        const serializedKeys = serializeShortcutKeys(keys, unOrdered);
         if (!scope) {
           const globalScopeMapToShortcuts = scopeMapToShortcut.get(GLOBAL_SCOPE);
           if (!globalScopeMapToShortcuts) return;
