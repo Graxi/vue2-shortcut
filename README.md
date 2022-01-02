@@ -1,41 +1,22 @@
 # V-shortcut
 
-Vue3 plugin for creating shortcuts to web pages in globally and customized scope.
+This plugin supports managing web shortcuts in vue framework, in global or custom scope. Currently, it works on Vue2 and Vue3.
 
-<!-- ## Description -->
-<!-- TODO Explain KeyGroup, Scope, once, excludeTags and preventWhen  -->
+## Usage
 
-## Getting Started
+This plugin uses key value of [KeyboardEvent: code values](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/code/code_values).
 
-### Dependencies
+The below is some examples on Windows system.
+|Key Type|Key Value|
+|---|---|
+|Modifier|Alt, Ctrl, Meta, Shift|
+|Digit|Digit{0-9}|
+|Letter|Key{A-Z}|
+|Symbol|Bracket{Left/Right}, Minus, Equal, Backquote, Backslash, etc.|
+|Special|Enter, Backspace|
 
-<!-- FIXME Compatible with other versions of Vue? -->
-Vue3
-<!-- FIXME Supported Version of Nodejs? -->
-Nodejs
-
-### Development
-
-```sh
-git clone https://github.com/Graxi/v-shortcut.git
-cd v-shortcut
-# Project setup
-npm install
-# Compile and hot-reload for development
-npm run serve
-# Compile and minify for production
-npm run bild
-# Run your test
-npm run test
-# Lint and fix code
-npm run lint
-```
-
-### Usage
-
-<!-- FIXME which name of this plugin should be imported -->
 ```ts
-import v-shortcut; 
+import v-shortcut;
 Vue.createShortcuts([
 {
     keyGroup: [['ctrl', 'c']],
@@ -54,10 +35,6 @@ Vue.createShortcuts([
 
 To resolve this error, Node.js needs to be downgraded to v16 or enabled compatible option of openssl. See more at https://stackoverflow.com/questions/69692842/error-message-error0308010cdigital-envelope-routinesunsupported
 
-<!-- TODO ## Contributors -->
+## Contributors
 
-<!-- TODO ## License -->
-
-<!-- TODO ## Acknowledgments 
-    This section may mention vue-shortkey and vue-global-events.
--->
+## License
