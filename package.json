@@ -6,7 +6,8 @@
   "scripts": {
     "format": "prettier --write \"dist/**/*.js\" \"src/**/*.ts\"",
     "lint": "eslint --fix \"dist/**/*.js\"",
-    "build": "tsc && npm run format && npm run lint"
+    "build": "tsc && npm run format && npm run lint",
+    "prepare": "npm run build"
   },
   "repository": {
     "type": "git",
