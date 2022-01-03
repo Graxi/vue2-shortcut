@@ -1,7 +1,9 @@
 import { CTRL, META, CONTROL, SCOPE_DATA_ATTRIBUTE, GLOBAL_SCOPE, USE_EVENT_KEY_ARRAY } from './constants';
 
+type Func = (e?: KeyboardEvent) => void;
+
 type EventHandler = {
-  func: Function;
+  func: Func;
   once?: boolean;
 };
 
@@ -18,7 +20,7 @@ export type ShortcutsList = {
 export type CreateShortcutParams = {
   scope?: string[]; // no scope means global
   keys: Keys; // for now only consider one key combo
-  eventHandler: Function;
+  eventHandler: Func;
   once?: boolean;
   unOrdered?: boolean;
 };
@@ -48,7 +50,7 @@ const serializeShortcutKeys = (keys: Keys, unOrdered = false): string => {
 const registerKeys = (
   serializedKeys: string,
   keysMapToEventHandler: KeysMapToEventHandler,
-  eventHandler: Function,
+  eventHandler: Func,
   once: boolean = false,
 ) => {
   if (!keysMapToEventHandler.has(serializedKeys)) {
@@ -69,11 +71,7 @@ const registerKeys = (
   }
 };
 
-const deregisterKeys = (
-  serializedKeys: string,
-  keysMapToEventHandler: KeysMapToEventHandler,
-  eventHandler: Function,
-) => {
+const deregisterKeys = (serializedKeys: string, keysMapToEventHandler: KeysMapToEventHandler, eventHandler: Func) => {
   // get the event listener
   const eventHandlerArray = keysMapToEventHandler.get(serializedKeys);
   if (!eventHandlerArray) return;
@@ -131,7 +129,7 @@ export default {
 
     const keysMapping: Map<string, Keys> = new Map(); // serializedKeys map to original keys
 
-    let activeScope: string | undefined = undefined;
+    let activeScope: string | undefined;
     // register event listener for click
     window.addEventListener('click', (e: MouseEvent) => {
       const $target = e.target as HTMLElement;

@@ -6,14 +6,12 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "lib": ["es6", "dom", "es2017"],
-    "declaration": true,
     "outDir": "dist",
     "rootDir": "src",
     "downlevelIteration": true,
     "strict": true
   },
   "exclude": [
-    "dist",
     "node_modules",
     "src/**/*.spec.ts"
   ],
