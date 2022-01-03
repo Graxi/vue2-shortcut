@@ -1,12 +1,30 @@
 # V-shortcut
 
-This plugin supports managing web shortcuts in vue framework, in global or custom scope. Currently, it works on Vue2 and Vue3.
+This plugin supports managing web shortcuts in vue framework
 
 ## Usage
 
-This plugin uses key value of [KeyboardEvent: code values](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/code/code_values).
+```ts
+Vue.createShortcuts(this, [
+  {
+    keys: ["Ctrl", "KeyC"],
+    scope: ["a"],
+    eventHandler: () => {
+      console.log("pressing ctrl + c in scope a");
+    },
+    once: true, // default false
+    unOrdered: true // default false
+  },
+]);
+```
 
-The below is some examples on Windows system.
+## Feature
+
+### Keys
+
+This plugin uses key value of [KeyboardEvent: code values](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/code/code_values) for windows system.
+
+The below is some examples of code values.
 |Key Type|Key Value|
 |---|---|
 |Modifier|Alt, Ctrl, Meta, Shift|
@@ -15,19 +33,23 @@ The below is some examples on Windows system.
 |Symbol|Bracket{Left/Right}, Minus, Equal, Backquote, Backslash, etc.|
 |Special|Enter, Backspace|
 
-```ts
-import v-shortcut;
-Vue.createShortcuts([
-{
-    keyGroup: [['ctrl', 'c']],
-    scope: ['a'],
-    eventHandler: () => {
-    console.log('pressing ctrl + c in scope a');
-    },
-    once: true
-}
-])
-```
+- Support multiple key combinations, such as arrays ['key1', 'key2', ... , 'keyN']
+- Merge `control` in Mac and `Ctrl` in Windows into `Ctrl` for less confusion.
+
+### Scope
+
+- Support self-define the `scope` of event and global scope by default
+- Can apply the same event on multiple scopes as ['scope1', 'scope2', ... , 'scopeN']
+
+<!-- TODO:  `excludeTags` and `preventWhen` -->
+
+### Once
+
+By default, a shortcut can raise an event more than once, but the parameter `once` be defined as true to raise the event only once.
+
+### Ordering
+
+Shortcuts are triggered sequentially by default, use `unOrder: true` to apply one combination of shortcut keys can raise event in any sequence.
 
 ## Help
 
