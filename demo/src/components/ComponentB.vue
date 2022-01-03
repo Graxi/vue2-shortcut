@@ -6,11 +6,11 @@
   </div>
 </template>
 
-<script lang='ts'>
-  import { Component, Vue } from 'vue-property-decorator';
-
-  @Component
-  export default class ComponentB extends Vue {
+<script>
+  import Vue from 'vue';
+  
+  export default {
+    name: 'ComponentB',
     mounted() {
       console.log('mounted B')
       Vue.createShortcuts(this, [

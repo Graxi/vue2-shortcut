@@ -32,9 +32,9 @@
   </div>
 </template>
 
-<script lang='ts'>
-  import { Component, Vue } from 'vue-property-decorator';
+<script>
   import ComponentB from './ComponentB.vue';
+  import Vue from 'vue';
 
   // only for manual testing
   const FIGMA_SHORTCUTS = [
@@ -42,26 +42,26 @@
     ['Ctrl', 'KeyB']
   ]
 
-  @Component({
+  export default {
+    name: 'Playground',
     components: {
       ComponentB
-    }
-  })
-
-  export default class Playground extends Vue {
-    loadComponentB: boolean = true;
-
-    manualTestShortcuts: string[][] = [...FIGMA_SHORTCUTS];
-
-    toggleComponentB() {
-      const loadComponentB = this.loadComponentB;
-      this.loadComponentB = !loadComponentB;
-    }
-
-    printShortcuts() {
-      console.log(Vue.getAvailableShortcuts());
-    }
-
+    },
+    data: function() {
+      return {
+        loadComponentB: true,
+        manualTestShortcuts: [...FIGMA_SHORTCUTS]
+      }
+    },
+    methods: {
+      toggleComponentB: function() {
+        const loadComponentB = this.loadComponentB;
+        this.loadComponentB = !loadComponentB;
+      },
+      printShortcuts: function() {
+        console.log(Vue.getAvailableShortcuts());
+      }
+    },
     mounted() {
       // section for testing ordered and unordered keys
       Vue.createShortcuts(this, [

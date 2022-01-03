@@ -4,16 +4,16 @@
   </div>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+<script>
 import Playground from './components/Playground.vue';
 
-@Component({
+export default {
+  name: 'App',
   components: {
     Playground
-  },
-})
-export default class App extends Vue {}
+  }
+}
+
 </script>
 
 <style>
@@ -25,3 +25,4 @@ export default class App extends Vue {}
   color: #2c3e50;
 }
 </style>
+
