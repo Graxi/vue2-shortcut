@@ -10,7 +10,7 @@ $ npm install --save vue2-shortcut
 ```
 
 ### 功能说明
-v-shortcut是为了帮助vue开发者在开发过程中更方便地添加快捷键 包括全局快捷键和局部快捷键
+v-shortcut是为了帮助vue开发者在开发过程中更方便地添加快捷键 包括全局快捷键和局部快捷键 查看[demo](https://codesandbox.io/s/vue2-shortcut-demo-quoui?file=/src/components/Playground.vue)
 
 #### 使用方法
 在任意一个.vue文件的**mounted** hook里注册快捷键 如:
