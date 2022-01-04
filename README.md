@@ -28,7 +28,6 @@ v-shortcut是为了帮助vue开发者在开发过程中更方便地添加快捷�
 ```
 
 #### 关于keys
-- 在参数中 keys暂时为一个数组 backspace或者delete由插件内部解决 使得用户在backspace或者delete上绑定的事件 能适用于两种情形
 - keybinding默认是keydown事件里**event.code** **这里需要注意的是 ctrl是由插件定义出来的virtual key** 因为在mac和windows系统下一个是Meta 一个是Control 为了避免开发者区别定义 使用Ctrl即可 插件会判断到底检测Meta还是Control
 
 #### 关于scope
