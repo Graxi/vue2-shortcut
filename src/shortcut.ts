@@ -1,120 +1,8 @@
-import { CTRL, META, CONTROL, SCOPE_DATA_ATTRIBUTE, GLOBAL_SCOPE, USE_EVENT_KEY_ARRAY } from './constants';
+import { META, SCOPE_DATA_ATTRIBUTE, GLOBAL_SCOPE, MAC } from './constants';
+import { Options, ScopeMapToShortcut, EventHandler, CreateShortcutParams, ShortcutsList, Keys } from './types.d';
+import { getEventKey, serializeShortcutKeys, registerKeys, deregisterKeys, emitShortcut } from './utils';
 
-type Func = (e?: KeyboardEvent) => void;
-
-type EventHandler = {
-  func: Func;
-  once?: boolean;
-};
-
-type KeysMapToEventHandler = Map<string, EventHandler[]>;
-
-type ScopeMapToShortcut = Map<string, KeysMapToEventHandler>;
-
-type Keys = string[]; // multiple keys may serve the same function
-
-export type ShortcutsList = {
-  [scope: string]: { keys: Keys }[];
-};
-
-export type CreateShortcutParams = {
-  scope?: string[]; // no scope means global
-  keys: Keys; // for now only consider one key combo
-  eventHandler: Func;
-  once?: boolean;
-  unOrdered?: boolean;
-};
-
-export type Options = {
-  excludeTags?: string[];
-  preventWhen?: CheckPreventFunction;
-};
-
-const isMac = navigator.platform.toUpperCase().indexOf('MAC') > -1;
-
-/**
- * serialize list of keys to string as key of the map
- * 1) sort the keys 2) handle cmd/ctrl based on isMac
- */
-const serializeShortcutKeys = (keys: Keys, unOrdered = false): string => {
-  const copy = [...keys];
-  // handle cmd/control
-  const metaOrControl = isMac ? META : CONTROL;
-  const indexOfCtrl = keys.indexOf(CTRL);
-  if (indexOfCtrl !== -1) copy.splice(indexOfCtrl, 1, metaOrControl);
-
-  if (unOrdered) copy.sort(); // if unOrdered sort the keys
-  return unOrdered ? copy.join('+') : copy.join(',');
-};
-
-const registerKeys = (
-  serializedKeys: string,
-  keysMapToEventHandler: KeysMapToEventHandler,
-  eventHandler: Func,
-  once: boolean = false,
-) => {
-  if (!keysMapToEventHandler.has(serializedKeys)) {
-    // init the map
-    keysMapToEventHandler.set(serializedKeys, []);
-  }
-  // get the event listener
-  const eventHandlerArray = keysMapToEventHandler.get(serializedKeys);
-  if (!eventHandlerArray) return;
-
-  const eventHandlerExists = eventHandlerArray.find((_) => _.func === eventHandler);
-  if (!eventHandlerExists) {
-    // insert
-    eventHandlerArray.push({
-      func: eventHandler,
-      once,
-    });
-  }
-};
-
-const deregisterKeys = (serializedKeys: string, keysMapToEventHandler: KeysMapToEventHandler, eventHandler: Func) => {
-  // get the event listener
-  const eventHandlerArray = keysMapToEventHandler.get(serializedKeys);
-  if (!eventHandlerArray) return;
-
-  const eventHandlerIndex = eventHandlerArray.findIndex((_) => _.func === eventHandler);
-  if (eventHandlerIndex !== -1) {
-    // remove
-    eventHandlerArray.splice(eventHandlerIndex, 1);
-  }
-
-  if (!eventHandlerArray.length) keysMapToEventHandler.delete(serializedKeys);
-};
-
-const emitShortcut = (
-  scopeMapToShortcut: ScopeMapToShortcut,
-  scope: string,
-  serializedKeys: string,
-  e: KeyboardEvent,
-  blockedEventHandlers: Set<EventHandler>,
-) => {
-  const keysMapToEventHandler: KeysMapToEventHandler | undefined = scopeMapToShortcut.get(scope);
-  if (!keysMapToEventHandler) return;
-
-  if (keysMapToEventHandler.has(serializedKeys)) {
-    const eventHandlerArray = keysMapToEventHandler.get(serializedKeys);
-    if (!eventHandlerArray) return;
-
-    eventHandlerArray.forEach((eventHandler) => {
-      if (blockedEventHandlers.has(eventHandler)) return;
-      eventHandler.func(e);
-      if (eventHandler.once) blockedEventHandlers.add(eventHandler);
-    });
-  }
-};
-
-/**
- * use e.code as event key except those from USE_EVENT_KEY_ARRAY
- */
-const getEventKey = (e: KeyboardEvent): string => {
-  return USE_EVENT_KEY_ARRAY.includes(e.key) ? e.key : e.code;
-};
-
-type CheckPreventFunction = (e?: KeyboardEvent) => boolean;
+const isMac = navigator.platform.toUpperCase().indexOf(MAC) > -1;
 
 export default {
   install(Vue: any, options: Options) {
@@ -161,8 +49,8 @@ export default {
       pressedKeys.add(eventKey);
 
       const serializedKeysArray = [
-        serializeShortcutKeys(Array.from(pressedKeys), true),
-        serializeShortcutKeys(Array.from(pressedKeys), false),
+        serializeShortcutKeys(isMac, Array.from(pressedKeys), true),
+        serializeShortcutKeys(isMac, Array.from(pressedKeys), false),
       ];
 
       serializedKeysArray.forEach((serializedKeys: string) => {
@@ -222,7 +110,7 @@ export default {
         const { scope, keys, eventHandler, once, unOrdered } = shortcut;
 
         // serialize keys
-        const serializedKeys = serializeShortcutKeys(keys, unOrdered);
+        const serializedKeys = serializeShortcutKeys(isMac, keys, unOrdered);
         if (!scope) {
           const globalScopeMapToShortcuts = scopeMapToShortcut.get(GLOBAL_SCOPE);
           if (!globalScopeMapToShortcuts) return;
