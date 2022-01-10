@@ -7,7 +7,7 @@ type EventHandler = {
 
 type KeysMapToEventHandler = Map<string, EventHandler[]>;
 
-type ScopeMapToShortcut = Map<string, KeysMapToEventHandler>;
+type ScopeMapToShortcuts = Map<string, KeysMapToEventHandler>;
 
 type Keys = string[]; // multiple keys may serve the same function
 
@@ -34,7 +34,7 @@ export {
   Func,
   EventHandler,
   KeysMapToEventHandler,
-  ScopeMapToShortcut,
+  ScopeMapToShortcuts,
   Keys,
   ShortcutsList,
   CreateShortcutParams,

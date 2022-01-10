@@ -1,31 +1,52 @@
 import {
-  USE_EVENT_KEY_ARRAY,
+  USE_EVENT_KEY_MAP_MAC,
+  USE_EVENT_KEY_MAP_WINDOWS,
   META,
   CONTROL,
   CTRL,
   ORDERED_KEYS_SEPARATOR,
   UNORDERED_KEYS_SEPARATOR,
+  GLOBAL_SCOPE,
+  SCOPE_DATA_ATTRIBUTE,
 } from './constants';
-import { Keys, KeysMapToEventHandler, Func, ScopeMapToShortcut, EventHandler } from './types.d';
+import { Keys, KeysMapToEventHandler, Func, ScopeMapToShortcuts, EventHandler, CreateShortcutParams } from './types.d';
+
+/**
+ * get current scope determined by mouse down event
+ */
+const getCurrentScope = (e: MouseEvent): undefined | string => {
+  const $target = e.target as HTMLElement;
+  const $scopeTarget = $target.closest(`[data-${SCOPE_DATA_ATTRIBUTE}]`) as HTMLElement;
+  if (!$scopeTarget) return undefined;
+  return $scopeTarget.dataset[SCOPE_DATA_ATTRIBUTE];
+};
 
 /**
  * use e.code as event key except those from USE_EVENT_KEY_ARRAY
  */
-const getEventKey = (e: KeyboardEvent): string => {
-  return USE_EVENT_KEY_ARRAY.includes(e.key) ? e.key : e.code;
+const getEventKey = (e: KeyboardEvent, isMac: boolean): string | undefined => {
+  const USE_EVENT_KEY_MAP = isMac ? USE_EVENT_KEY_MAP_MAC : USE_EVENT_KEY_MAP_WINDOWS;
+  return USE_EVENT_KEY_MAP.has(e.code) ? USE_EVENT_KEY_MAP.get(e.code) : e.code;
+};
+
+/**
+ * when user uses CTRL to register a shortcut, we will replace CTRL with CONTROL or META based on navigator
+ */
+const replaceCtrlInKeys = (isMac: boolean, keys: Keys): Keys => {
+  const copy = [...keys];
+  const indexOfCtrl = copy.indexOf(CTRL);
+  if (indexOfCtrl == -1) return copy;
+  const metaOrControl = isMac ? META : CONTROL;
+  copy.splice(indexOfCtrl, 1, metaOrControl);
+  return copy;
 };
 
 /**
  * serialize list of keys to string as key of the map
- * 1) sort the keys 2) handle cmd/ctrl based on isMac
+ * sort keys based on unOrdered
  */
-const serializeShortcutKeys = (isMac: boolean, keys: Keys, unOrdered = false): string => {
+const serializeShortcutKeys = (keys: Keys, unOrdered = false): string => {
   const copy = [...keys];
-  // handle cmd/control
-  const metaOrControl = isMac ? META : CONTROL;
-  const indexOfCtrl = keys.indexOf(CTRL);
-  if (indexOfCtrl !== -1) copy.splice(indexOfCtrl, 1, metaOrControl);
-
   if (unOrdered) copy.sort(); // if unOrdered sort the keys
   return unOrdered ? copy.join(UNORDERED_KEYS_SEPARATOR) : copy.join(ORDERED_KEYS_SEPARATOR);
 };
@@ -37,16 +58,14 @@ const registerKeys = (
   once: boolean = false,
 ) => {
   if (!keysMapToEventHandler.has(serializedKeys)) {
-    // init the map
     keysMapToEventHandler.set(serializedKeys, []);
   }
-  // get the event listener
+
   const eventHandlerArray = keysMapToEventHandler.get(serializedKeys);
   if (!eventHandlerArray) return;
 
   const eventHandlerExists = eventHandlerArray.find((_) => _.func === eventHandler);
   if (!eventHandlerExists) {
-    // insert
     eventHandlerArray.push({
       func: eventHandler,
       once,
@@ -55,13 +74,11 @@ const registerKeys = (
 };
 
 const deregisterKeys = (serializedKeys: string, keysMapToEventHandler: KeysMapToEventHandler, eventHandler: Func) => {
-  // get the event listener
   const eventHandlerArray = keysMapToEventHandler.get(serializedKeys);
   if (!eventHandlerArray) return;
 
   const eventHandlerIndex = eventHandlerArray.findIndex((_) => _.func === eventHandler);
   if (eventHandlerIndex !== -1) {
-    // remove
     eventHandlerArray.splice(eventHandlerIndex, 1);
   }
 
@@ -69,7 +86,7 @@ const deregisterKeys = (serializedKeys: string, keysMapToEventHandler: KeysMapTo
 };
 
 const emitShortcut = (
-  scopeMapToShortcut: ScopeMapToShortcut,
+  scopeMapToShortcut: ScopeMapToShortcuts,
   scope: string,
   serializedKeys: string,
   e: KeyboardEvent,
@@ -85,9 +102,75 @@ const emitShortcut = (
     eventHandlerArray.forEach((eventHandler) => {
       if (blockedEventHandlers.has(eventHandler)) return;
       eventHandler.func(e);
-      if (eventHandler.once) blockedEventHandlers.add(eventHandler);
+      if (eventHandler.once) blockedEventHandlers.add(eventHandler); // TODO: optimize by not calling emitShortcut repeatedly
     });
   }
 };
 
-export { getEventKey, serializeShortcutKeys, registerKeys, deregisterKeys, emitShortcut };
+const addOrRemoveShortcuts = (
+  shortcuts: CreateShortcutParams[],
+  remove: boolean,
+  context: {
+    isMac: boolean;
+    scopeMapToShortcuts: ScopeMapToShortcuts;
+    keysMapping: Map<string, Keys>;
+  },
+) => {
+  const { isMac, scopeMapToShortcuts, keysMapping } = context;
+  shortcuts.forEach((shortcut: CreateShortcutParams) => {
+    const { scope, keys, eventHandler, once, unOrdered } = shortcut;
+
+    // serialize keys
+    const transformedKeys = replaceCtrlInKeys(isMac, keys);
+    const serializedKeys = serializeShortcutKeys(transformedKeys, unOrdered);
+    if (!scope) {
+      const globalScopeMapToShortcuts = scopeMapToShortcuts.get(GLOBAL_SCOPE);
+      if (!globalScopeMapToShortcuts) return;
+
+      if (remove) {
+        deregisterKeys(serializedKeys, globalScopeMapToShortcuts, eventHandler);
+        // check if should delete keys from keysMapping
+        const eventHandlerArray = globalScopeMapToShortcuts.get(serializedKeys);
+        if (!eventHandlerArray) keysMapping.delete(serializedKeys);
+      } else {
+        keysMapping.set(serializedKeys, keys);
+        registerKeys(serializedKeys, globalScopeMapToShortcuts, eventHandler, once);
+      }
+    } else {
+      if (!Array.isArray(scope)) {
+        console.error('Scope must be an array');
+        return;
+      }
+      // loop scope and register/deregister on each scope
+      for (const s of scope) {
+        if (!scopeMapToShortcuts.has(s)) {
+          console.error(`scope: ${s} is not registered as a shortcut-scope`);
+          continue;
+        }
+        const certainScopeMapToShortcuts = scopeMapToShortcuts.get(s);
+        if (!certainScopeMapToShortcuts) return;
+
+        if (remove) {
+          deregisterKeys(serializedKeys, certainScopeMapToShortcuts, eventHandler);
+          // check if should delete keys from keysMapping
+          const eventHandlerArray = certainScopeMapToShortcuts.get(serializedKeys);
+          if (!eventHandlerArray) keysMapping.delete(serializedKeys);
+        } else {
+          keysMapping.set(serializedKeys, keys);
+          registerKeys(serializedKeys, certainScopeMapToShortcuts, eventHandler, once);
+        }
+      }
+    }
+  });
+};
+
+export {
+  getCurrentScope,
+  getEventKey,
+  replaceCtrlInKeys,
+  serializeShortcutKeys,
+  registerKeys,
+  deregisterKeys,
+  emitShortcut,
+  addOrRemoveShortcuts,
+};
