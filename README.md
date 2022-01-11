@@ -1,5 +1,7 @@
 ## vue2-shortcut
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/7734dae0a7c041e285b74fd7389844ce)](https://app.codacy.com/gh/Graxi/vue2-shortcut?utm_source=github.com&utm_medium=referral&utm_content=Graxi/vue2-shortcut&utm_campaign=Badge_Grade_Settings)
+
 Vue2.x plugin to create scoped or global shortcuts.
 No need to import a vue component into the template.
 
