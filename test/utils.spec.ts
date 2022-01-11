@@ -38,25 +38,25 @@ describe('it should test getCurrentScope', () => {
 // replaceCtrlInKeys
 describe('it should test replaceCtrlInKeys()', () => {
   test('if CTRL is not included in keys, do nothing about the keys array', () => {
-    const mockKeys = ['KeyA', 'KeyB'];
+    const mockKeys = ['a', 'b'];
     const isMac = [true, false][getRandomIndex(2)];
     expect(replaceCtrlInKeys(isMac, mockKeys)).toEqual(mockKeys);
   })
 
   test('if CTRL is included in keys, replace it with META when isMac is true', () => {
-    const mockKeys = [CTRL, 'KeyA', 'KeyB'];
-    expect(replaceCtrlInKeys(true, mockKeys)).toEqual([META, 'KeyA', 'KeyB']);
+    const mockKeys = [CTRL, 'a', 'b'];
+    expect(replaceCtrlInKeys(true, mockKeys)).toEqual([META, 'a', 'b']);
   })
 
   test('if CTRL is included in keys, replace it with CONTROL when isMac is false', () => {
-    const mockKeys = [CTRL, 'KeyA', 'KeyB'];
-    expect(replaceCtrlInKeys(false, mockKeys)).toEqual([CONTROL, 'KeyA', 'KeyB']);
+    const mockKeys = [CTRL, 'a', 'b'];
+    expect(replaceCtrlInKeys(false, mockKeys)).toEqual([CONTROL, 'a', 'b']);
   })
 })
 
 // serializeShortcutKeys
 describe('it should test serializeShortcutKeys()', () => {
-  const mockKeys = [META, 'KeyA', 'KeyB'];
+  const mockKeys = [META, 'a', 'b'];
 
   test('if unOrdered is false, it should concatenate keys with comma', () => {
     expect(serializeShortcutKeys(mockKeys, false)).toEqual(mockKeys.join(ORDERED_KEYS_SEPARATOR));
@@ -75,7 +75,7 @@ describe('it should test serializeShortcutKeys()', () => {
 describe('it should test registerKeys()', () => {
   test('if keys are not existed yet, it should init array for the keys', () => {
     const mockKeysMapToEventHandler = new Map();
-    const mockSerializedKeys = 'KeyA, KeyB';
+    const mockSerializedKeys = 'a, b';
     const mockEventHandler = {
       func: () => {},
       once: true
@@ -87,7 +87,7 @@ describe('it should test registerKeys()', () => {
   })
 
   test('if keys already exist, it should insert the event handler into current array', () => {
-    const mockSerializedKeys = 'KeyA, KeyB';
+    const mockSerializedKeys = 'a, b';
     const mockEventHandler1 = {
       func: () => {},
       once: true
@@ -109,7 +109,7 @@ describe('it should test registerKeys()', () => {
   })
 
   test('it should not register the same event handler repeatedly for the same keys', () => {
-    const mockSerializedKeys = 'KeyA, KeyB';
+    const mockSerializedKeys = 'a, b';
     const mockEventHandler = {
       func: () => {},
       once: true
@@ -127,12 +127,12 @@ describe('it should test registerKeys()', () => {
 // deregisterKeys
 describe('it should test deregisterKeys', () => {
   test('it should do nothing if there is no event handler array for keys', () => {
-    const mockSerializedKeys1 = 'KeyA, KeyB';
+    const mockSerializedKeys1 = 'a, b';
     const mockEventHandler1 = {
       func: () => {},
       once: false
     }
-    const mockSerializedKeys2 = 'KeyB, KeyC';
+    const mockSerializedKeys2 = 'a, c';
 
     const mockKeysMapToEventHandler = new Map([
       [mockSerializedKeys1, [ mockEventHandler1 ]]
@@ -148,7 +148,7 @@ describe('it should test deregisterKeys', () => {
   })
 
   test('it should remove event handler from the array for the keys if exist', () => {
-    const mockSerializedKeys = 'KeyA, KeyB';
+    const mockSerializedKeys = 'a, b';
     const mockEventHandler1 = {
       func: () => {},
       once: false
@@ -167,7 +167,7 @@ describe('it should test deregisterKeys', () => {
   })
 
   test('it should delete keys from the map if the event handler array is empty after removal', () => {
-    const mockSerializedKeys = 'KeyA, KeyB';
+    const mockSerializedKeys = 'a, b';
     const mockEventHandler = {
       func: () => {},
       once: false
@@ -192,7 +192,7 @@ describe('it should test emitShortcut()', () => {
     func: jest.fn((e: KeyboardEvent) => {}),
     once: false
   }
-  const mockSerializedKeys = 'KeyA, KeyB';
+  const mockSerializedKeys = 'a, b';
   mockScopeMapToShortcut.set(mockScope, new Map([
     [ mockSerializedKeys, [
       mockEventHandler1,

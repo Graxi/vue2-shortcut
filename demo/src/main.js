@@ -2,7 +2,9 @@ import Vue from 'vue'
 import App from './App.vue'
 import vShortcut from '../../dist/shortcut';
 
-Vue.use(vShortcut);
+Vue.use(vShortcut, {
+  excludeTags: ['input']
+});
 Vue.config.productionTip = false
 
 new Vue({
