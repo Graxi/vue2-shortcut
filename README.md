@@ -3,6 +3,10 @@
 Vue2.x plugin to create scoped or global shortcuts.
 No need to import a vue component into the template.
 
+![AppVeyor](https://img.shields.io/appveyor/build/Graxi/vue2-shortcut)
+
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/0831c96d38034ebd880d79448fb3c934)](https://www.codacy.com/gh/Graxi/vue2-shortcut/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Graxi/vue2-shortcut&amp;utm_campaign=Badge_Grade)
+
 ### Install
 
 ```bash
