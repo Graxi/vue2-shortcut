@@ -8,28 +8,72 @@ No need to import a vue component into the template.
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/0831c96d38034ebd880d79448fb3c934)](https://www.codacy.com/gh/Graxi/vue2-shortcut/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Graxi/vue2-shortcut&amp;utm_campaign=Badge_Grade)
 
 ### Install
-
 ```bash
 $ npm install --save vue2-shortcut
 ```
 
-### 功能说明
-v-shortcut是为了帮助vue开发者在开发过程中更方便地添加快捷键 包括全局快捷键和局部快捷键 查看[demo](https://codesandbox.io/s/vue2-shortcut-demo-quoui?file=/src/components/Playground.vue)
+### Usage
+```
+import Vue from 'vue';
+import vShortcut from 'vue2-shortcut';
+Vue.use(vShortcut);
+```
+Check demo [here](https://codesandbox.io/s/vue2-shortcut-demo-quoui?file=/src/components/Playground.vue)
 
-#### 使用方法
-在任意一个.vue文件的**mounted** hook里注册快捷键 如:
+#### Register shortcuts
+Register your shortcuts in any vue template under the **mounted** hook
 ```
-      Vue.createShortcuts(this, [
-        {
-          keys: ['Ctrl', 'KeyC'],
-          scope: ['a'],
-          eventHandler: () => {
-            console.log('pressing ctrl + c in scope a');
-          },
-          once: true
-        }
-      ])
+  mounted() {
+    Vue.createShortcuts(this, [
+      {
+        keys: ['ctrl', 'c'],
+        scope: ['a'],
+        eventHandler: () => {
+          console.log('pressing ctrl + c in scope a');
+        },
+        once: true
+      }
+    ])
+  }
 ```
+
+#### Key List
+
+Below is the list of keys mapping. Use `ctrl` if you want the shortcut to work with `meta` on mac and `control` on windows.
+
+| Keyboard     | shortcut key |
+| ------------ | ------------ |
+| A - Z        | a - z        |
+| 0 - 9        | 0 - 9        |
+| F1 - F12     | f1 - f12     |
+| Escape       | esc          |
+| Backquote    | backquote    |
+| Minus        | minus        |
+| Equal        | equal        |
+| Backspace    | backspace    |
+| Tab          | tab          |
+| CapsLock     | capslock     |
+| Space        | space        |
+| Pause        | pause        |
+| Delete       | delete       |
+| ContextMenu  | contextmenu  |
+| BracketLeft  | bracketleft  |
+| BracketRight | bracketright |
+| Backslash    | backslash    |
+| Semicolon    | semicolon    |
+| Quote        | quote        |
+| Enter        | enter        |
+| Comma        | comma        |
+| Period       | period       |
+| Slash        | slash        |
+| ArrowLeft    | arrowleft    |
+| ArrowUp      | arrowup      |
+| ArrowRight   | arrowright   |
+| ArrowDown    | arrowdown    |
+| Control      | control      |
+| Shift        | shift        |
+| Alt          | alt          |
+| Meta         | meta         |
 
 #### 关于keys
 - keybinding默认是keydown事件里**event.code** **这里需要注意的是 ctrl是由插件定义出来的virtual key** 因为在mac和windows系统下一个是Meta 一个是Control 为了避免开发者区别定义 使用Ctrl即可 插件会判断到底检测Meta还是Control

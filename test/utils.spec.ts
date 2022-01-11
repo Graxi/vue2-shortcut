@@ -2,8 +2,8 @@
  * @jest-environment jsdom
  */
 
-import { getCurrentScope, getEventKey, replaceCtrlInKeys, serializeShortcutKeys, registerKeys, deregisterKeys, emitShortcut } from '../src/utils';
-import { USE_EVENT_KEY_MAP_MAC, USE_EVENT_KEY_MAP_WINDOWS, CTRL, META, CONTROL, UNORDERED_KEYS_SEPARATOR, ORDERED_KEYS_SEPARATOR, SCOPE_DATA_ATTRIBUTE } from '../src/constants';
+import { getCurrentScope, replaceCtrlInKeys, serializeShortcutKeys, registerKeys, deregisterKeys, emitShortcut } from '../src/utils';
+import { CTRL, META, CONTROL, UNORDERED_KEYS_SEPARATOR, ORDERED_KEYS_SEPARATOR, SCOPE_DATA_ATTRIBUTE } from '../src/constants';
 import { EventHandler } from '../src/types.d';
 
 const getRandomIndex = (length: number) => {
@@ -32,35 +32,6 @@ describe('it should test getCurrentScope', () => {
       target: $scopeArea
     };
     expect(getCurrentScope(mockEvent)).toEqual(SCOPE);
-  })
-})
-
-// getEventKey
-describe('it should test getEventKey()', () => {
-  const isMac = [true, false][getRandomIndex(2)];
-  const USE_EVENT_KEY_MAP = isMac ? USE_EVENT_KEY_MAP_MAC : USE_EVENT_KEY_MAP_WINDOWS;
-  const codesArray = Array.from(USE_EVENT_KEY_MAP.keys());
-
-  test('for keys included in USE_EVENT_KEY_MAP, it should convert event.code', () => {
-    const randomIndex = getRandomIndex(USE_EVENT_KEY_MAP.size);
-    const mockEvent = {
-      code: codesArray[randomIndex]
-    } as KeyboardEvent;
-    expect(getEventKey(mockEvent, isMac)).toEqual(USE_EVENT_KEY_MAP.get(mockEvent.code));
-  })
-
-  test('for keys not included in USE_EVENT_KEY_MAP, it should return event.code', () => {
-    const mockEvent = {
-      code: 'KeyA'
-    } as KeyboardEvent;
-    expect(getEventKey(mockEvent, isMac)).toEqual(mockEvent.code);
-  })
-
-  test('for undefined keys, it should return undefined', () => {
-    const mockEvent = {
-      code: undefined
-    } as KeyboardEvent;
-    expect(getEventKey(mockEvent, isMac)).toBeUndefined();
   })
 })
 

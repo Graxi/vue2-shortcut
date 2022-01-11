@@ -38,8 +38,8 @@
 
   // only for manual testing
   const FIGMA_SHORTCUTS = [
-    ['Ctrl', 'KeyC'],
-    ['Ctrl', 'KeyB']
+    ['ctrl', 'c'],
+    ['ctrl', 'b']
   ]
 
   export default {
@@ -66,13 +66,13 @@
       // section for testing ordered and unordered keys
       Vue.createShortcuts(this, [
         {
-          keys: ['Ctrl', 'KeyE'],
+          keys: ['ctrl', 'e'],
           eventHandler: () => {
             console.log('pressing ctrl + e in order');
           },
         },
         {
-          keys: ['Ctrl', 'KeyE'],
+          keys: ['ctrl', 'e'],
           eventHandler: () => {
             console.log('pressing ctrl + e regardless of order');
           },
@@ -90,68 +90,6 @@
           if (idx !== -1) this.manualTestShortcuts.splice(idx, 1);
         }
       })))
-
-      // Vue.createShortcuts(this, [
-      //   {
-      //     keys: ['Ctrl', 'KeyC'],
-      //     scope: ['a'],
-      //     eventHandler: () => {
-      //       console.log('pressing ctrl + c in scope a');
-      //       console.log('executed repeatedly');
-      //       console.log('*************');
-      //     }
-      //   },
-      //   {
-      //     keys: ['Ctrl', 'KeyC'],
-      //     eventHandler: () => {
-      //       console.log('pressing ctrl + c in global scope');
-      //       console.log('executed once');
-      //       console.log('*************');
-      //     },
-      //     once: true
-      //   },
-      //   {
-      //     keys: ['Ctrl', 'KeyA'],
-      //     scope: ['c'],
-      //     eventHandler: () => {
-      //       console.log('pressing ctrl + a in scope c')
-      //     }
-      //   },
-      //   // space key
-      //   {
-      //     keys: ['KeyA', 'Space'],
-      //     eventHandler: () => {
-      //       console.log('pressing a + space in global scope');
-      //     }
-      //   },
-      //   // special keys: , or . or \
-      //   {
-      //     keys: ['Backslash', 'KeyA'],
-      //     eventHandler: () => {
-      //       console.log('pressing \\ + a in global scope');
-      //     }
-      //   },
-      //   // keys start with shift
-      //   {
-      //     keys: ['Shift', 'Digit1'],
-      //     eventHandler: () => {
-      //       console.log('pressing shift + 1 in global scope');
-      //     }
-      //   },
-      //   {
-      //     keys: ['Ctrl', 'Shift', 'Digit1'],
-      //     eventHandler: () => {
-      //       console.log('pressing ctrl + shift + 1 in global scope');
-      //     }
-      //   },
-      //   // keys with alt
-      //   {
-      //     keys: ['Alt', 'Digit1'],
-      //     eventHandler: () => {
-      //       console.log('pressing alt + 1 in global scope');
-      //     }
-      //   }
-      // ])
     }
   }
 </script>

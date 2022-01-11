@@ -1,13 +1,6 @@
-import { META, SCOPE_DATA_ATTRIBUTE, GLOBAL_SCOPE, MAC } from './constants';
+import { META, SCOPE_DATA_ATTRIBUTE, GLOBAL_SCOPE, MAC, KEY_MAPPING } from './constants';
 import { Options, ScopeMapToShortcuts, EventHandler, CreateShortcutParams, ShortcutsList, Keys } from './types.d';
-import {
-  getCurrentScope,
-  getEventKey,
-  replaceCtrlInKeys,
-  serializeShortcutKeys,
-  emitShortcut,
-  addOrRemoveShortcuts,
-} from './utils';
+import { getCurrentScope, replaceCtrlInKeys, serializeShortcutKeys, emitShortcut, addOrRemoveShortcuts } from './utils';
 
 const isMac = navigator.platform.toUpperCase().indexOf(MAC) > -1;
 
@@ -39,7 +32,7 @@ export default {
       if (excludeTags && excludeTags.includes($target.tagName.toLowerCase())) return;
       if (preventWhen && preventWhen(e)) return;
 
-      const eventKey = getEventKey(e, isMac);
+      const eventKey = KEY_MAPPING.get(e.code);
       if (!eventKey) return;
 
       // reset blockedEventHandlers when keys are changed
@@ -69,7 +62,7 @@ export default {
       if (excludeTags && excludeTags.includes($target.tagName.toLowerCase())) return;
       if (preventWhen && preventWhen(e)) return;
 
-      const eventKey = getEventKey(e, isMac);
+      const eventKey = KEY_MAPPING.get(e.code);
       if (!eventKey) return;
 
       if (pressedKeys.has(eventKey)) {

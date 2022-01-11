@@ -1,6 +1,4 @@
 import {
-  USE_EVENT_KEY_MAP_MAC,
-  USE_EVENT_KEY_MAP_WINDOWS,
   META,
   CONTROL,
   CTRL,
@@ -19,14 +17,6 @@ const getCurrentScope = (e: MouseEvent): undefined | string => {
   const $scopeTarget = $target.closest(`[data-${SCOPE_DATA_ATTRIBUTE}]`) as HTMLElement;
   if (!$scopeTarget) return undefined;
   return $scopeTarget.dataset[SCOPE_DATA_ATTRIBUTE];
-};
-
-/**
- * use e.code as event key except those from USE_EVENT_KEY_ARRAY
- */
-const getEventKey = (e: KeyboardEvent, isMac: boolean): string | undefined => {
-  const USE_EVENT_KEY_MAP = isMac ? USE_EVENT_KEY_MAP_MAC : USE_EVENT_KEY_MAP_WINDOWS;
-  return USE_EVENT_KEY_MAP.has(e.code) ? USE_EVENT_KEY_MAP.get(e.code) : e.code;
 };
 
 /**
@@ -166,7 +156,6 @@ const addOrRemoveShortcuts = (
 
 export {
   getCurrentScope,
-  getEventKey,
   replaceCtrlInKeys,
   serializeShortcutKeys,
   registerKeys,
