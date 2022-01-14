@@ -76,12 +76,12 @@ Below is the list of keys mapping. Use `ctrl` if you want a shortcut to work wit
 | Backquote    | backquote    |
 | Minus        | minus        |
 | Equal        | equal        |
-| Backspace    | backspace    |
+| Backspace    | del          |
 | Tab          | tab          |
 | CapsLock     | capslock     |
 | Space        | space        |
 | Pause        | pause        |
-| Delete       | delete       |
+| Delete       | del          |
 | ContextMenu  | contextmenu  |
 | BracketLeft  | bracketleft  |
 | BracketRight | bracketright |

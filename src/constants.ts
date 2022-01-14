@@ -24,7 +24,7 @@ const KEY_MAPPING: ReadonlyMap<string, string> = new Map([
   ['Digit0', '0'],
   ['Minus', 'minus'],
   ['Equal', 'equal'],
-  ['Backspace', 'backspace'],
+  ['Backspace', 'del'],
   ['Tab', 'tab'],
   ['CapsLock', 'capslock'],
   ['Space', 'space'],
@@ -88,7 +88,7 @@ const KEY_MAPPING: ReadonlyMap<string, string> = new Map([
   ['F11', 'f11'],
   ['F12', 'f12'],
   ['Pause', 'pause'],
-  ['Delete', 'delete'],
+  ['Delete', 'del'],
   ['ContextMenu', 'contextmenu'],
 ]);
 

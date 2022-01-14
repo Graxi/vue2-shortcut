@@ -41,10 +41,11 @@ export default {
       pressedKeys.add(eventKey);
 
       const transformedKeys = replaceCtrlInKeys(isMac, Array.from(pressedKeys));
-      const serializedKeysArray = [
-        serializeShortcutKeys(transformedKeys, true),
-        serializeShortcutKeys(transformedKeys, false),
-      ];
+      const serializedKeysArray = [ serializeShortcutKeys(transformedKeys, true) ];
+      // for multiple keys
+      if (transformedKeys.length > 1) {
+        serializedKeysArray.push(serializeShortcutKeys(transformedKeys, false));
+      }
 
       serializedKeysArray.forEach((serializedKeys: string) => {
         if (keysMapping.has(serializedKeys)) {
@@ -119,5 +120,10 @@ export default {
 
       return shortcuts;
     };
+
+    // get current active scope
+    Vue.$activeScope = (): string | undefined => {
+      return activeScope;
+    }
   },
 };
