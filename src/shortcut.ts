@@ -1,5 +1,13 @@
 import { META, SCOPE_DATA_ATTRIBUTE, GLOBAL_SCOPE, MAC, KEY_MAPPING } from './constants';
-import { Options, ScopeMapToShortcuts, EventHandler, CreateShortcutParams, ShortcutsList, Keys } from './types.d';
+import {
+  Options,
+  ScopeMapToShortcuts,
+  EventHandler,
+  CreateShortcutParams,
+  ShortcutsList,
+  Keys,
+  KeysMapping,
+} from './types.d';
 import { getCurrentScope, replaceCtrlInKeys, serializeShortcutKeys, emitShortcut, addOrRemoveShortcuts } from './utils';
 
 const isMac = navigator.platform.toUpperCase().indexOf(MAC) > -1;
@@ -12,7 +20,7 @@ export default {
     const scopeMapToShortcuts: ScopeMapToShortcuts = new Map();
     scopeMapToShortcuts.set(GLOBAL_SCOPE, new Map());
 
-    const keysMapping: Map<string, Keys> = new Map(); // serializedKeys map to original keys
+    const keysMapping: KeysMapping = new Map(); // serializedKeys map to original keys
 
     let activeScope: string | undefined;
 
@@ -41,7 +49,7 @@ export default {
       pressedKeys.add(eventKey);
 
       const transformedKeys = replaceCtrlInKeys(isMac, Array.from(pressedKeys));
-      const serializedKeysArray = [ serializeShortcutKeys(transformedKeys, true) ];
+      const serializedKeysArray = [serializeShortcutKeys(transformedKeys, true)];
       // for multiple keys
       if (transformedKeys.length > 1) {
         serializedKeysArray.push(serializeShortcutKeys(transformedKeys, false));
@@ -109,11 +117,9 @@ export default {
       for (const [scope, shortcutsForScope] of scopeMapToShortcuts) {
         shortcuts[scope] = [];
         for (const serializedKeys of shortcutsForScope.keys()) {
-          const originalKeys: Keys | undefined = keysMapping.get(serializedKeys);
-          if (originalKeys) {
-            shortcuts[scope].push({
-              keys: originalKeys,
-            });
+          const keysInfo = keysMapping.get(serializedKeys);
+          if (keysInfo) {
+            shortcuts[scope].push(keysInfo);
           }
         }
       }
@@ -122,8 +128,8 @@ export default {
     };
 
     // get current active scope
-    Vue.$activeScope = (): string | undefined => {
+    Vue.$activeShortcutScope = (): string | undefined => {
       return activeScope;
-    }
+    };
   },
 };

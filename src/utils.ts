@@ -7,7 +7,15 @@ import {
   GLOBAL_SCOPE,
   SCOPE_DATA_ATTRIBUTE,
 } from './constants';
-import { Keys, KeysMapToEventHandler, Func, ScopeMapToShortcuts, EventHandler, CreateShortcutParams } from './types.d';
+import {
+  Keys,
+  KeysMapToEventHandler,
+  Func,
+  ScopeMapToShortcuts,
+  EventHandler,
+  CreateShortcutParams,
+  KeysMapping,
+} from './types.d';
 
 /**
  * get current scope determined by mouse down event
@@ -103,12 +111,12 @@ const addOrRemoveShortcuts = (
   context: {
     isMac: boolean;
     scopeMapToShortcuts: ScopeMapToShortcuts;
-    keysMapping: Map<string, Keys>;
+    keysMapping: KeysMapping;
   },
 ) => {
   const { isMac, scopeMapToShortcuts, keysMapping } = context;
   shortcuts.forEach((shortcut: CreateShortcutParams) => {
-    const { scope, keys, eventHandler, once, unOrdered } = shortcut;
+    const { scope, keys, eventHandler, once, unOrdered, description } = shortcut;
 
     // serialize keys
     const transformedKeys = replaceCtrlInKeys(isMac, keys);
@@ -123,7 +131,10 @@ const addOrRemoveShortcuts = (
         const eventHandlerArray = globalScopeMapToShortcuts.get(serializedKeys);
         if (!eventHandlerArray) keysMapping.delete(serializedKeys);
       } else {
-        keysMapping.set(serializedKeys, keys);
+        keysMapping.set(serializedKeys, {
+          originalKeys: keys,
+          description,
+        });
         registerKeys(serializedKeys, globalScopeMapToShortcuts, eventHandler, once);
       }
     } else {
@@ -146,7 +157,10 @@ const addOrRemoveShortcuts = (
           const eventHandlerArray = certainScopeMapToShortcuts.get(serializedKeys);
           if (!eventHandlerArray) keysMapping.delete(serializedKeys);
         } else {
-          keysMapping.set(serializedKeys, keys);
+          keysMapping.set(serializedKeys, {
+            originalKeys: keys,
+            description,
+          });
           registerKeys(serializedKeys, certainScopeMapToShortcuts, eventHandler, once);
         }
       }

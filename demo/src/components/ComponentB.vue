@@ -19,7 +19,8 @@
           scope: ['b'],
           eventHandler: () => {
             this.$emit('log', 'you just pressed ctrl + b in scope b');
-          }
+          },
+          description: 'CTRL + B'
         },
         {
           keys: ['shift', 'b'],
