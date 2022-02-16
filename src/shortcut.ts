@@ -8,7 +8,14 @@ import {
   Keys,
   KeysMapping,
 } from './types.d';
-import { getCurrentScope, replaceCtrlInKeys, serializeShortcutKeys, emitShortcut, addOrRemoveShortcuts } from './utils';
+import {
+  getCurrentScope,
+  replaceCtrlInKeys,
+  serializeShortcutKeys,
+  emitShortcut,
+  addOrRemoveShortcuts,
+  getKeysMappingEntry,
+} from './utils';
 
 const isMac = navigator.platform.toUpperCase().indexOf(MAC) > -1;
 
@@ -56,9 +63,12 @@ export default {
       }
 
       serializedKeysArray.forEach((serializedKeys: string) => {
-        if (keysMapping.has(serializedKeys)) {
+        if (
+          keysMapping.has(getKeysMappingEntry(serializedKeys, activeScope)) ||
+          keysMapping.has(getKeysMappingEntry(serializedKeys, GLOBAL_SCOPE))
+        ) {
           e.preventDefault();
-          // emit activeScope events
+          // emit scope events
           if (activeScope) emitShortcut(scopeMapToShortcuts, activeScope, serializedKeys, e, blockedEventHandlers);
           // emit global scope events
           emitShortcut(scopeMapToShortcuts, GLOBAL_SCOPE, serializedKeys, e, blockedEventHandlers);
@@ -113,11 +123,10 @@ export default {
     // get all shortcuts
     Vue.getAvailableShortcuts = (): ShortcutsList => {
       const shortcuts: ShortcutsList = {};
-
       for (const [scope, shortcutsForScope] of scopeMapToShortcuts) {
         shortcuts[scope] = [];
         for (const serializedKeys of shortcutsForScope.keys()) {
-          const keysInfo = keysMapping.get(serializedKeys);
+          const keysInfo = keysMapping.get(getKeysMappingEntry(serializedKeys, scope));
           if (keysInfo) {
             shortcuts[scope].push(keysInfo);
           }

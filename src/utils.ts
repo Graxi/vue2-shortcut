@@ -27,6 +27,10 @@ const getCurrentScope = (e: MouseEvent): undefined | string => {
   return $scopeTarget.dataset[SCOPE_DATA_ATTRIBUTE];
 };
 
+const getKeysMappingEntry = (serializedKeys: string, scope?: string) => {
+  return scope ? serializedKeys + '|' + scope : serializedKeys;
+};
+
 /**
  * when user uses CTRL to register a shortcut, we will replace CTRL with CONTROL or META based on navigator
  */
@@ -121,48 +125,36 @@ const addOrRemoveShortcuts = (
     // serialize keys
     const transformedKeys = replaceCtrlInKeys(isMac, keys);
     const serializedKeys = serializeShortcutKeys(transformedKeys, unOrdered);
+    let scopesList: string[] = [];
     if (!scope) {
-      const globalScopeMapToShortcuts = scopeMapToShortcuts.get(GLOBAL_SCOPE);
-      if (!globalScopeMapToShortcuts) return;
-
-      if (remove) {
-        deregisterKeys(serializedKeys, globalScopeMapToShortcuts, eventHandler);
-        // check if should delete keys from keysMapping
-        const eventHandlerArray = globalScopeMapToShortcuts.get(serializedKeys);
-        if (!eventHandlerArray) keysMapping.delete(serializedKeys);
-      } else {
-        keysMapping.set(serializedKeys, {
-          originalKeys: keys,
-          description,
-        });
-        registerKeys(serializedKeys, globalScopeMapToShortcuts, eventHandler, once);
-      }
+      scopesList = [GLOBAL_SCOPE];
     } else {
       if (!Array.isArray(scope)) {
         console.error('Scope must be an array');
         return;
       }
-      // loop scope and register/deregister on each scope
-      for (const s of scope) {
-        if (!scopeMapToShortcuts.has(s)) {
-          console.error(`scope: ${s} is not registered as a shortcut-scope`);
-          continue;
-        }
-        const certainScopeMapToShortcuts = scopeMapToShortcuts.get(s);
-        if (!certainScopeMapToShortcuts) return;
+      scopesList = scope;
+    }
 
-        if (remove) {
-          deregisterKeys(serializedKeys, certainScopeMapToShortcuts, eventHandler);
-          // check if should delete keys from keysMapping
-          const eventHandlerArray = certainScopeMapToShortcuts.get(serializedKeys);
-          if (!eventHandlerArray) keysMapping.delete(serializedKeys);
-        } else {
-          keysMapping.set(serializedKeys, {
-            originalKeys: keys,
-            description,
-          });
-          registerKeys(serializedKeys, certainScopeMapToShortcuts, eventHandler, once);
-        }
+    for (const s of scopesList) {
+      if (!scopeMapToShortcuts.has(s)) {
+        console.error(`scope: ${s} is not registered as a shortcut-scope`);
+        continue;
+      }
+      const certainScopeMapToShortcuts = scopeMapToShortcuts.get(s);
+      if (!certainScopeMapToShortcuts) return;
+      const keysMappingEntry = getKeysMappingEntry(serializedKeys, s);
+      if (remove) {
+        deregisterKeys(serializedKeys, certainScopeMapToShortcuts, eventHandler);
+        // check if should delete keys from keysMapping
+        const eventHandlerArray = certainScopeMapToShortcuts.get(serializedKeys);
+        if (!eventHandlerArray) keysMapping.delete(keysMappingEntry);
+      } else {
+        keysMapping.set(keysMappingEntry, {
+          originalKeys: keys,
+          description,
+        });
+        registerKeys(serializedKeys, certainScopeMapToShortcuts, eventHandler, once);
       }
     }
   });
@@ -170,6 +162,7 @@ const addOrRemoveShortcuts = (
 
 export {
   getCurrentScope,
+  getKeysMappingEntry,
   replaceCtrlInKeys,
   serializeShortcutKeys,
   registerKeys,
