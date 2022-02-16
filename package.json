@@ -1,6 +1,6 @@
 {
   "name": "vue2-shortcut",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A Vue2.x plugin to quickly create shortcuts.",
   "main": "./dist/shortcut.js",
   "scripts": {
